@@ -1,7 +1,7 @@
 package sqlite
 
 import (
-	"assetman/pkg/storage"
+	"github.com/cmp307/assetman/pkg/storage"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 )
@@ -10,11 +10,13 @@ type repository struct {
 	db *gorm.DB
 }
 
-func NewRepository() *repository {
-	db, _ := gorm.Open(sqlite.Open("gorm.db"), &gorm.Config{
+func Connect() (*gorm.DB, error) {
+	return gorm.Open(sqlite.Open("gorm.db"), &gorm.Config{
 		DisableForeignKeyConstraintWhenMigrating: true,
 	})
+}
 
+func NewRepository(db *gorm.DB) *repository {
 	db.AutoMigrate(
 		&storage.Asset{},
 		storage.User{},
