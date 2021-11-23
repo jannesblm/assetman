@@ -1,0 +1,20 @@
+{
+  "name": "assetman",
+  "assetdir": "frontend/dist",
+  "frontend:build": "npm run build",
+  "frontend:install": "npm install",
+  "frontend:dev": "",
+  "wailsjsdir": "./frontend",
+  "version": "2",
+  "Path": "",
+  "BuildDir": "",
+  "outputfilename": "assetman.exe",
+  "OutputType": "",
+  "Platform": "",
+  "Author": {
+    "name": "Jannes Blume",
+    "email": "1903180@uad.ac.uk"
+  },
+  "debounceMS": 100,
+  "devserverurl": "http://localhost:34115"
+}
