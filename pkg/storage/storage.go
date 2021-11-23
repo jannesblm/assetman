@@ -24,7 +24,18 @@ type Manufacturer struct {
 	Name string
 }
 
+type User struct {
+	gorm.Model
+	ID       uint
+	Name     string
+	Password []byte `gorm:"size:60"`
+}
+
 type AssetRepository interface {
 	// GetAll retrieves all stored assets from the database.
 	GetAll() ([]Asset, error)
+}
+
+type UserRepository interface {
+	GetByName(name string) (User, error)
 }
