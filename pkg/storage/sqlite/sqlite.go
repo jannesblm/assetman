@@ -17,10 +17,10 @@ func Connect() (*gorm.DB, error) {
 }
 
 func NewRepository(db *gorm.DB) *repository {
-	db.AutoMigrate(
+	/*db.AutoMigrate(
 		&storage.Asset{},
 		storage.User{},
-	)
+	)*/
 
 	return &repository{
 		db,

@@ -5,7 +5,7 @@ go 1.17
 require (
 	github.com/cmp307/assetman v0.0.0-20211106223325-43f22cf62b64
 	github.com/joho/godotenv v1.4.0
-	github.com/wailsapp/wails/v2 v2.0.0-beta.15
+	github.com/wailsapp/wails/v2 v2.0.0-beta.20
 	go.uber.org/fx v1.14.2
 )
 
