@@ -1,0 +1,53 @@
+name: Go
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+
+  build:
+    runs-on: windows-2019
+    env:
+      GOPRIVATE: github.com/cmp307/*
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        persist-credentials: false
+        
+    - run: |
+        git config --global url."https://${{ secrets.GIT_TOKEN }}:x-oauth-basic@github.com".insteadOf "https://github.com"
+
+    - name: Install UPX
+      shell: bash
+      run: |
+          curl -s https://api.github.com/repos/upx/upx/releases/latest \
+            | grep "browser_download_url.*win64" \
+            | cut -d : -f 2,3 \
+            | tr -d \" \
+            | xargs -n1 curl -SsLo upx.zip
+          7z e upx.zip -o./cmd/wails upx.exe -r
+
+    - name: Set up Go
+      uses: actions/setup-go@v2
+      with:
+        go-version: 1.17
+        
+    - name: Set up node
+      uses: actions/setup-node@v2
+      
+    - name: Install Wails
+      run: go install github.com/wailsapp/wails/v2/cmd/wails@latest
+
+    - name: Wails Doctor
+      run: wails doctor
+
+    - name: Build
+      working-directory: ./cmd/wails
+      run: wails build -platform windows -upx
+
+    - name: Test
+      run: go test -v ./...
