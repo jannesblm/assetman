@@ -1,7 +1,22 @@
-import App from './App.svelte';
+import { createApp } from 'vue'
+import {createRouter, createMemoryHistory} from 'vue-router'
 
-const app = new App({
-	target: document.body,
-});
+import App from './App.vue'
+import HelloWorld from "@/components/HelloWorld";
 
-export default app;
+import '@tabler/core/dist/css/tabler.css'
+import '@tabler/core/dist/js/tabler'
+import AssetList from "@/components/AssetList";
+
+
+const routes = [
+    {path: '/', component: HelloWorld},
+    {path: '/asset/list', component: AssetList,},
+];
+
+const router = createRouter({
+    history: createMemoryHistory(),
+    routes,
+})
+
+createApp(App).use(router).mount('#app')

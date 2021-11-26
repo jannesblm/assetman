@@ -9,7 +9,6 @@ import (
 	"github.com/wailsapp/wails/v2/pkg/logger"
 	"github.com/wailsapp/wails/v2/pkg/options"
 	"github.com/wailsapp/wails/v2/pkg/options/windows"
-	_ "go.uber.org/fx"
 	"log"
 )
 
@@ -33,8 +32,6 @@ func main() {
 		Height:            570,
 		MinWidth:          720,
 		MinHeight:         570,
-		MaxWidth:          1280,
-		MaxHeight:         740,
 		DisableResize:     false,
 		Fullscreen:        false,
 		Frameless:         false,

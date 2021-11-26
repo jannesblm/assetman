@@ -6,11 +6,9 @@ require (
 	github.com/cmp307/assetman v0.0.0-20211106223325-43f22cf62b64
 	github.com/joho/godotenv v1.4.0
 	github.com/wailsapp/wails/v2 v2.0.0-beta.20
-	go.uber.org/fx v1.14.2
 )
 
 require (
-	github.com/BurntSushi/toml v0.4.1 // indirect
 	github.com/andybalholm/brotli v1.0.2 // indirect
 	github.com/fasthttp/websocket v0.0.0-20200320073529-1554a54587ab // indirect
 	github.com/gabriel-vasile/mimetype v1.3.1 // indirect
@@ -40,13 +38,8 @@ require (
 	github.com/valyala/bytebufferpool v1.0.0 // indirect
 	github.com/valyala/fasthttp v1.28.0 // indirect
 	github.com/valyala/tcplisten v1.0.0 // indirect
-	go.uber.org/atomic v1.6.0 // indirect
-	go.uber.org/dig v1.12.0 // indirect
-	go.uber.org/multierr v1.5.0 // indirect
-	go.uber.org/zap v1.16.0 // indirect
 	golang.org/x/net v0.0.0-20210805182204-aaa1db679c0d // indirect
 	golang.org/x/sys v0.0.0-20211020174200-9d6173849985 // indirect
-	golang.org/x/tools v0.1.7 // indirect
 	gorm.io/driver/sqlite v1.2.3 // indirect
 	gorm.io/gorm v1.22.2 // indirect
 )
