@@ -3,9 +3,9 @@ module github.com/cmp307/assetman/cmd/wails
 go 1.17
 
 require (
-	github.com/cmp307/assetman v0.0.0-20211106223325-43f22cf62b64
+	github.com/cmp307/assetman v0.0.0-20211126122919-72c233487cc2
 	github.com/joho/godotenv v1.4.0
-	github.com/wailsapp/wails/v2 v2.0.0-beta.20
+	github.com/wailsapp/wails/v2 v2.0.0-beta.21
 )
 
 require (
@@ -16,6 +16,7 @@ require (
 	github.com/gofiber/fiber/v2 v2.17.0 // indirect
 	github.com/gofiber/websocket/v2 v2.0.8 // indirect
 	github.com/google/uuid v1.1.2 // indirect
+	github.com/gotk3/gotk3 v0.6.1 // indirect
 	github.com/imdario/mergo v0.3.12 // indirect
 	github.com/jchv/go-winloader v0.0.0-20210711035445-715c2860da7e // indirect
 	github.com/jinzhu/inflection v1.0.0 // indirect
@@ -38,10 +39,8 @@ require (
 	github.com/valyala/bytebufferpool v1.0.0 // indirect
 	github.com/valyala/fasthttp v1.28.0 // indirect
 	github.com/valyala/tcplisten v1.0.0 // indirect
-	golang.org/x/net v0.0.0-20210805182204-aaa1db679c0d // indirect
+	golang.org/x/net v0.0.0-20210510120150-4163338589ed // indirect
 	golang.org/x/sys v0.0.0-20211020174200-9d6173849985 // indirect
 	gorm.io/driver/sqlite v1.2.3 // indirect
 	gorm.io/gorm v1.22.2 // indirect
 )
-
-// replace github.com/wailsapp/wails/v2 v2.0.0-beta.15 => C:\Users\Jannes\go\pkg\mod\github.com\wailsapp\wails\v2@v2.0.0-beta.15

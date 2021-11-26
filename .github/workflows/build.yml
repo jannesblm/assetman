@@ -1,29 +1,63 @@
-name: Build Windows
+name: Build
 
 on:
-  push:
-    branches: [ main ]
   pull_request:
-    branches: [ main ]
+    branches:
+      - main
   workflow_dispatch:
 
 jobs:
-
   build:
     runs-on: windows-2019
     env:
       GOPRIVATE: github.com/cmp307/*
     steps:
-    - uses: actions/checkout@v2
-      with:
-        persist-credentials: false
-        
-    - run: |
-        git config --global url."https://${{ secrets.GIT_TOKEN }}:x-oauth-basic@github.com".insteadOf "https://github.com"
+      - name: Set up Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: 1.17
 
-    - name: Install UPX
-      shell: bash
-      run: |
+      - uses: actions/checkout@v2
+        with:
+          persist-credentials: false
+
+      - name: Define cache keys
+        id: cache-vars
+        working-directory: ./cmd/wails
+        shell: bash
+        run: |
+          echo "::set-output name=go-build::$(go env GOCACHE)"
+          echo "::set-output name=go-mod::$(go env GOMODCACHE)"
+          echo "::set-output name=go-bin::$(go env GOPATH)\bin\wails.exe"
+          echo "::set-output name=wails-ver::$(go list -f {{.Version}} -m github.com/wailsapp/wails/v2)"
+
+      - name: Configure Git authentication
+        run: |
+          git config --global url."https://${{ secrets.GIT_TOKEN }}:x-oauth-basic@github.com".insteadOf "https://github.com"
+
+      - name: Go build cache
+        uses: actions/cache@v2
+        with:
+          path: ${{ steps.cache-vars.outputs.go-build }}
+          key: ${{ runner.os }}-go-build-${{ hashFiles('**/cmd/wails/go.sum') }}
+
+      - name: Go mod cache
+        uses: actions/cache@v2
+        with:
+          path: ${{ steps.cache-vars.outputs.go-mod }}
+          key: ${{ runner.os }}-go-mod-${{ hashFiles('**/cmd/wails/go.sum') }}
+
+      - name: Wails cache
+        id: wails-cache
+        uses: actions/cache@v2
+        with:
+          path: ${{ steps.cache-vars.outputs.go-bin }}
+          key: ${{ runner.os }}-wails-${{ steps.cache-vars.outputs.wails-ver }}
+
+      - name: Install UPX
+        if: github.event.pull_request.merged == true
+        shell: bash
+        run: |
           curl -s https://api.github.com/repos/upx/upx/releases/latest \
             | grep "browser_download_url.*win64" \
             | cut -d : -f 2,3 \
@@ -31,29 +65,26 @@ jobs:
             | xargs -n1 curl -SsLo upx.zip
           7z e upx.zip -o./cmd/wails upx.exe -r
 
-    - name: Set up Go
-      uses: actions/setup-go@v2
-      with:
-        go-version: 1.17
-        
-    - name: Set up node
-      uses: actions/setup-node@v2
-      
-    - name: Install Wails
-      run: go install github.com/wailsapp/wails/v2/cmd/wails@latest
+      - name: Set up node
+        uses: actions/setup-node@v2
 
-    - name: Wails Doctor
-      run: wails doctor
+      - name: Install Wails
+        if: steps.wails-cache.outputs.cache-hit != 'true'
+        run: go install github.com/wailsapp/wails/v2/cmd/wails@${{ steps.cache-vars.outputs.wails-ver }}
 
-    - name: Build
-      working-directory: ./cmd/wails
-      run: wails build -platform windows -upx
+      - name: Wails Doctor
+        run: wails doctor
 
-    - name: Test
-      run: go test -v ./...
+      - name: Build
+        working-directory: ./cmd/wails
+        run: wails build -platform windows -upx
 
-    - name: Upload artifact
-      uses: actions/upload-artifact@v2
-      with:
-        name: win64-executable
-        path: ./cmd/wails/build/bin/assetman.exe
+      - name: Test
+        run: go test -v ./...
+
+      - name: Upload artifact
+        if: github.event.pull_request.merged == true
+        uses: actions/upload-artifact@v2
+        with:
+          name: win64-executable
+          path: ./cmd/wails/build/bin/assetman.exe
