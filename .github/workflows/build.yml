@@ -4,6 +4,11 @@ on:
   pull_request:
     branches:
       - main
+    types:
+      - opened
+      - reopened
+      - synchronize
+      - closed
   workflow_dispatch:
 
 jobs:
@@ -28,7 +33,7 @@ jobs:
         run: |
           echo "::set-output name=go-build::$(go env GOCACHE)"
           echo "::set-output name=go-mod::$(go env GOMODCACHE)"
-          echo "::set-output name=go-bin::$(go env GOPATH)\bin\wails.exe"
+          echo "::set-output name=go-bin::$(go env GOPATH)\bin"
           echo "::set-output name=wails-ver::$(go list -f {{.Version}} -m github.com/wailsapp/wails/v2)"
 
       - name: Configure Git authentication
@@ -39,20 +44,20 @@ jobs:
         uses: actions/cache@v2
         with:
           path: ${{ steps.cache-vars.outputs.go-build }}
-          key: ${{ runner.os }}-go-build-${{ hashFiles('**/cmd/wails/go.sum') }}
+          key: go-build-${{ hashFiles('**/cmd/wails/go.sum') }}
 
       - name: Go mod cache
         uses: actions/cache@v2
         with:
           path: ${{ steps.cache-vars.outputs.go-mod }}
-          key: ${{ runner.os }}-go-mod-${{ hashFiles('**/cmd/wails/go.sum') }}
+          key: go-mod-${{ hashFiles('**/cmd/wails/go.sum') }}
 
       - name: Wails cache
         id: wails-cache
         uses: actions/cache@v2
         with:
           path: ${{ steps.cache-vars.outputs.go-bin }}
-          key: ${{ runner.os }}-wails-${{ steps.cache-vars.outputs.wails-ver }}
+          key: wails-${{ steps.cache-vars.outputs.wails-ver }}
 
       - name: Install UPX
         if: github.event.pull_request.merged == true
