@@ -50,7 +50,6 @@ func (s *suite) SetupSuite() {
 
 func (s *suite) Test_Asset_GetAll() {
 	assetStub := storage.Asset{
-		ID:   0,
 		Name: "",
 	}
 
