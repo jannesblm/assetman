@@ -18,7 +18,9 @@ func Connect() (*gorm.DB, error) {
 
 func NewRepository(db *gorm.DB) *repository {
 	/*db.AutoMigrate(
-		&storage.Asset{},
+		storage.Asset{},
+		storage.HardwareAsset{},
+		storage.SoftwareAsset{},
 		storage.User{},
 	)*/
 
@@ -29,9 +31,52 @@ func NewRepository(db *gorm.DB) *repository {
 
 func (t *repository) GetAll() ([]storage.Asset, error) {
 	var assets []storage.Asset
-	err := t.db.Find(&assets).Error
+
+	err := t.db.
+		Preload("Manufacturer").
+		Preload("SoftwareAsset").
+		Preload("HardwareAsset").
+		Find(&assets).Error
 
 	return assets, err
+}
+
+func (t *repository) GetById(id uint) storage.Asset {
+	var asset storage.Asset
+
+	t.db.Preload("Manufacturer").
+		Preload("SoftwareAsset").
+		Preload("HardwareAsset").
+		Where("id = ?", id).
+		First(&asset)
+
+	return asset
+}
+
+func (t *repository) GetAllByNameContains(needle string) ([]storage.Asset, error) {
+	var assets []storage.Asset
+
+	err := t.db.
+		Preload("Manufacturer").
+		Preload("SoftwareAsset").
+		Preload("HardwareAsset").
+		Where("name like '%?%'", needle).
+		Error
+
+	return assets, err
+}
+
+func (t *repository) Add(asset interface{}) error {
+	switch v := asset.(type) {
+	case storage.HardwareAsset:
+		return t.db.Create(&v).Error
+	case storage.SoftwareAsset:
+		return t.db.Create(&v).Error
+	default:
+		panic("invalid type")
+	}
+
+	return nil
 }
 
 func (t *repository) GetByName(name string) (storage.User, error) {
