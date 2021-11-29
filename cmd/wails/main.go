@@ -2,6 +2,7 @@ package main
 
 import (
 	"embed"
+	"github.com/cmp307/assetman/pkg/storage/sqlite"
 	_ "github.com/cmp307/assetman/pkg/storage/sqlite"
 	_ "github.com/cmp307/assetman/pkg/vulnerability"
 	"github.com/joho/godotenv"
@@ -25,6 +26,9 @@ func main() {
 	// Create an instance of the app structure
 	app := NewApp()
 
+	db, err := sqlite.Connect()
+	ar := sqlite.NewRepository(db)
+
 	// Create application with options
 	opts := &options.App{
 		Title:             "AssetMan",
@@ -45,6 +49,7 @@ func main() {
 		OnShutdown:        app.shutdown,
 		Bind: []interface{}{
 			app,
+			ar,
 		},
 		// Windows platform specific options
 		Windows: &windows.Options{

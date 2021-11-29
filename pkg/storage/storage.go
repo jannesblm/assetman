@@ -42,7 +42,7 @@ type SoftwareAsset struct {
 
 type Manufacturer struct {
 	gorm.Model
-	Name string
+	Name string `gorm:"uniqueIndex"`
 }
 
 type User struct {
@@ -51,10 +51,19 @@ type User struct {
 	Password []byte `gorm:"size:60"`
 }
 
+type QueryOptions struct {
+	Limit  int
+	Offset int
+	Order  string `default:"id desc"`
+}
+
 type AssetRepository interface {
 	// GetAll retrieves all stored assets from the database.
 	GetAll() ([]Asset, error)
-	GetAssetById(uint) Asset
+	CountAll() int64
+	GetById(uint) Asset
+	GetAllManufacturers() ([]Manufacturer, error)
+	PaginateByName(string, QueryOptions) ([]Asset, error)
 }
 
 type UserRepository interface {
