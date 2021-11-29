@@ -3,220 +3,129 @@
     <div class="container-fluid">
       <div class="col-12">
         <div class="card">
+          <div class="card-body border-bottom py-3">
+            <div class="d-flex">
+              <div class="text-muted">
+                Show
+                <div class="mx-2 d-inline-block">
+                  <input aria-label="Invoices count" class="form-control form-control-sm" size="3" type="text"
+                         v-model="limit">
+                </div>
+                entries
+              </div>
+              <div class="ms-auto text-muted">
+                Search:
+                <div class="ms-2 d-inline-block">
+                  <input class="form-control form-control-sm" type="text" v-model="query">
+                </div>
+              </div>
+            </div>
+          </div>
           <div class="table-responsive">
-            <table class="table table-vcenter table-mobile-md card-table">
+            <table class="table table-vcenter card-table">
               <thead>
               <tr>
+                <th>#</th>
                 <th>Name</th>
-                <th>Title</th>
-                <th>Role</th>
+                <th>Manufacturer</th>
+                <th>Description</th>
+                <th>Updated</th>
                 <th class="w-1"></th>
               </tr>
               </thead>
               <tbody>
-              <tr>
-                <td data-label="Name">
-                  <div class="d-flex py-1 align-items-center">
-                    <span class="avatar me-2" style="background-image: url(./static/avatars/010m.jpg)"></span>
-                    <div class="flex-fill">
-                      <div class="font-weight-medium">Thatcher Keel</div>
-                      <div class="text-muted"><a href="#" class="text-reset">tkeelf@blogger.com</a></div>
-                    </div>
-                  </div>
-                </td>
-                <td data-label="Title">
-                  <div>VP Sales</div>
-                  <div class="text-muted">Business Development</div>
-                </td>
-                <td class="text-muted" data-label="Role">
-                  User
-                </td>
-                <td>
-                  <div class="btn-list flex-nowrap">
-                    <a href="#" class="btn btn-white">
-                      Edit
-                    </a>
-                    <div class="dropdown">
-                      <button class="btn dropdown-toggle align-text-top" data-bs-boundary="viewport" data-bs-toggle="dropdown" aria-expanded="false">
-                        Actions
-                      </button>
-                      <div class="dropdown-menu dropdown-menu-end" style="">
-                        <a class="dropdown-item" href="#">
-                          Action
-                        </a>
-                        <a class="dropdown-item" href="#">
-                          Another action
-                        </a>
-                      </div>
-                    </div>
-                  </div>
-                </td>
-              </tr>
-              <tr>
-                <td data-label="Name">
-                  <div class="d-flex py-1 align-items-center">
-                    <span class="avatar me-2" style="background-image: url(./static/avatars/005f.jpg)"></span>
-                    <div class="flex-fill">
-                      <div class="font-weight-medium">Dyann Escala</div>
-                      <div class="text-muted"><a href="#" class="text-reset">descalag@usatoday.com</a></div>
-                    </div>
-                  </div>
-                </td>
-                <td data-label="Title">
-                  <div>Mechanical Systems Engineer</div>
-                  <div class="text-muted">Sales</div>
-                </td>
-                <td class="text-muted" data-label="Role">
-                  Admin
-                </td>
-                <td>
-                  <div class="btn-list flex-nowrap">
-                    <a href="#" class="btn btn-white">
-                      Edit
-                    </a>
-                    <div class="dropdown">
-                      <button class="btn dropdown-toggle align-text-top" data-bs-boundary="viewport" data-bs-toggle="dropdown">
-                        Actions
-                      </button>
-                      <div class="dropdown-menu dropdown-menu-end">
-                        <a class="dropdown-item" href="#">
-                          Action
-                        </a>
-                        <a class="dropdown-item" href="#">
-                          Another action
-                        </a>
-                      </div>
-                    </div>
-                  </div>
-                </td>
-              </tr>
-              <tr>
-                <td data-label="Name">
-                  <div class="d-flex py-1 align-items-center">
-                    <span class="avatar me-2" style="background-image: url(./static/avatars/006f.jpg)"></span>
-                    <div class="flex-fill">
-                      <div class="font-weight-medium">Avivah Mugleston</div>
-                      <div class="text-muted"><a href="#" class="text-reset">amuglestonh@intel.com</a></div>
-                    </div>
-                  </div>
-                </td>
-                <td data-label="Title">
-                  <div>Actuary</div>
-                  <div class="text-muted">Sales</div>
-                </td>
-                <td class="text-muted" data-label="Role">
-                  User
-                </td>
-                <td>
-                  <div class="btn-list flex-nowrap">
-                    <a href="#" class="btn btn-white">
-                      Edit
-                    </a>
-                    <div class="dropdown">
-                      <button class="btn dropdown-toggle align-text-top" data-bs-boundary="viewport" data-bs-toggle="dropdown">
-                        Actions
-                      </button>
-                      <div class="dropdown-menu dropdown-menu-end">
-                        <a class="dropdown-item" href="#">
-                          Action
-                        </a>
-                        <a class="dropdown-item" href="#">
-                          Another action
-                        </a>
-                      </div>
-                    </div>
-                  </div>
-                </td>
-              </tr>
-              <tr>
-                <td data-label="Name">
-                  <div class="d-flex py-1 align-items-center">
-                    <span class="avatar me-2">AA</span>
-                    <div class="flex-fill">
-                      <div class="font-weight-medium">Arlie Armstead</div>
-                      <div class="text-muted"><a href="#" class="text-reset">aarmsteadi@yellowpages.com</a></div>
-                    </div>
-                  </div>
-                </td>
-                <td data-label="Title">
-                  <div>VP Quality Control</div>
-                  <div class="text-muted">Accounting</div>
-                </td>
-                <td class="text-muted" data-label="Role">
-                  Owner
-                </td>
-                <td>
-                  <div class="btn-list flex-nowrap">
-                    <a href="#" class="btn btn-white">
-                      Edit
-                    </a>
-                    <div class="dropdown">
-                      <button class="btn dropdown-toggle align-text-top" data-bs-boundary="viewport" data-bs-toggle="dropdown">
-                        Actions
-                      </button>
-                      <div class="dropdown-menu dropdown-menu-end">
-                        <a class="dropdown-item" href="#">
-                          Action
-                        </a>
-                        <a class="dropdown-item" href="#">
-                          Another action
-                        </a>
-                      </div>
-                    </div>
-                  </div>
-                </td>
-              </tr>
-              <tr>
-                <td data-label="Name">
-                  <div class="d-flex py-1 align-items-center">
-                    <span class="avatar me-2" style="background-image: url(./static/avatars/008f.jpg)"></span>
-                    <div class="flex-fill">
-                      <div class="font-weight-medium">Tessie Curzon</div>
-                      <div class="text-muted"><a href="#" class="text-reset">tcurzonj@hp.com</a></div>
-                    </div>
-                  </div>
-                </td>
-                <td data-label="Title">
-                  <div>Research Nurse</div>
-                  <div class="text-muted">Product Management</div>
-                </td>
-                <td class="text-muted" data-label="Role">
-                  Admin
-                </td>
-                <td>
-                  <div class="btn-list flex-nowrap">
-                    <a href="#" class="btn btn-white">
-                      Edit
-                    </a>
-                    <div class="dropdown">
-                      <button class="btn dropdown-toggle align-text-top" data-bs-boundary="viewport" data-bs-toggle="dropdown">
-                        Actions
-                      </button>
-                      <div class="dropdown-menu dropdown-menu-end">
-                        <a class="dropdown-item" href="#">
-                          Action
-                        </a>
-                        <a class="dropdown-item" href="#">
-                          Another action
-                        </a>
-                      </div>
-                    </div>
-                  </div>
+              <tr v-for="asset in assets" :key="asset.ID">
+                <td data-label="ID">{{ asset.ID }}</td>
+                <td data-label="Name">{{ asset.Name }}</td>
+                <td data-label="Manufacturer">{{ asset.Manufacturer.Name }}</td>
+                <td data-label="Description">{{ asset.Description }}</td>
+                <td data-label="UpdatedAt">{{ asset.UpdatedAt }}</td>
+                <td data-label="Edit">
+                  <a href="#" @click="editAsset(asset)">Edit</a>
                 </td>
               </tr>
               </tbody>
             </table>
           </div>
+          <div class="card-footer d-flex align-items-center">
+            <p class="m-0 text-muted">Showing {{ assets.length }} to {{ limit }} of {{ $store.state.assetCount }} entries</p>
+            <ul class="pagination m-0 ms-auto">
+              <li :class="[{disabled: page <= availablePages}, 'page-item']">
+                <a class="page-link" href="#" tabindex="-1">
+                  <i class="ti ti-chevron-left"></i>
+                  prev
+                </a>
+              </li>
+              <li v-for="i in availablePages" :key="i" class="page-item">
+                <a :class="[{active: page === i}, 'page-link']" @click="page = i">{{ i }}</a>
+              </li>
+              <li :class="[{disabled: page >= availablePages}, 'page-item']">
+                <a class="page-link" href="#">
+                  next
+                  <i class="ti ti-chevron-right"></i>
+                </a>
+              </li>
+            </ul>
+          </div>
         </div>
       </div>
     </div>
   </div>
-
+  <AssetEdit ref="editModal" :id="editingAssetId"></AssetEdit>
 </template>
 
 <script>
+import AssetEdit from "@/components/AssetEdit";
+
 export default {
-  name: "AssetList"
+  name: "AssetList",
+  components: {AssetEdit},
+
+  data() {
+    return {
+      limit: 10,
+      page: 1,
+      availablePages: 1,
+      offset: 0,
+      query: '',
+      assets: [],
+      editingAssetId: null,
+    }
+  },
+
+  methods: {
+    async loadAssets() {
+      this.assets = await window.go.sqlite.repository.PaginateByName(this.query, {
+        Limit: this.limit,
+        Offset: this.offset,
+        Order: "id desc",
+      })
+
+      this.page = 1
+      this.availablePages = Math.ceil(this.assets.length / this.limit)
+
+      if (this.availablePages === 0) {
+        this.availablePages = 1
+      }
+    },
+
+    editAsset(asset) {
+      this.editingAssetId = asset.ID
+      $(this.$refs.editModal.$el).modal('show')
+    },
+  },
+
+  watch: {
+    query: function() {
+      this.loadAssets()
+    },
+  },
+
+  mounted() {
+    this.loadAssets()
+    this.$store.commit('updateAssetCount')
+    this.$store.commit('updateManufacturers')
+  }
 }
 </script>
 

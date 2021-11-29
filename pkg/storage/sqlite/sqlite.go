@@ -4,6 +4,7 @@ import (
 	"github.com/cmp307/assetman/pkg/storage"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
 
 type repository struct {
@@ -32,11 +33,9 @@ func NewRepository(db *gorm.DB) *repository {
 func (t *repository) GetAll() ([]storage.Asset, error) {
 	var assets []storage.Asset
 
-	err := t.db.
-		Preload("Manufacturer").
-		Preload("SoftwareAsset").
-		Preload("HardwareAsset").
-		Find(&assets).Error
+	err := t.db.Preload(clause.Associations).
+		Find(&assets).
+		Error
 
 	return assets, err
 }
@@ -44,23 +43,32 @@ func (t *repository) GetAll() ([]storage.Asset, error) {
 func (t *repository) GetById(id uint) storage.Asset {
 	var asset storage.Asset
 
-	t.db.Preload("Manufacturer").
-		Preload("SoftwareAsset").
-		Preload("HardwareAsset").
+	t.db.Preload(clause.Associations).
 		Where("id = ?", id).
 		First(&asset)
 
 	return asset
 }
 
-func (t *repository) GetAllByNameContains(needle string) ([]storage.Asset, error) {
+func (t *repository) PaginateByName(needle string, options storage.QueryOptions) ([]storage.Asset, error) {
 	var assets []storage.Asset
 
-	err := t.db.
-		Preload("Manufacturer").
-		Preload("SoftwareAsset").
-		Preload("HardwareAsset").
-		Where("name like '%?%'", needle).
+	tx := t.db.Preload(clause.Associations).
+		Order(options.Order)
+
+	if len(needle) > 0 {
+		tx.Where("name like ?", "%"+needle+"%")
+	}
+
+	if options.Limit > 0 {
+		tx.Limit(options.Limit)
+	}
+
+	if options.Offset > 0 {
+		tx.Offset(options.Offset)
+	}
+
+	err := tx.Find(&assets).
 		Error
 
 	return assets, err
@@ -79,9 +87,26 @@ func (t *repository) Add(asset interface{}) error {
 	return nil
 }
 
+func (t *repository) GetAllManufacturers() ([]storage.Manufacturer, error) {
+	var manufacturers []storage.Manufacturer
+	err := t.db.Find(&manufacturers).Error
+
+	return manufacturers, err
+}
+
+func (t *repository) CountAll() int64 {
+	var count int64
+	t.db.Model(&storage.Asset{}).Count(&count)
+
+	return count
+}
+
 func (t *repository) GetByName(name string) (storage.User, error) {
 	var user storage.User
-	err := t.db.Where("name = ?", name).First(&user).Error
+
+	err := t.db.Where("name = ?", name).
+		First(&user).
+		Error
 
 	return user, err
 }
