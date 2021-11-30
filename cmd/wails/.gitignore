@@ -1,6 +1,8 @@
 # Wails bin directory
 build/bin
 
+frontend/src/models.*
+
 # IDEs
 .idea
 .vscode
