@@ -73,12 +73,24 @@ jobs:
       - name: Set up node
         uses: actions/setup-node@v2
 
+      - name: Install TS compiler
+        run: npm install -g typescript
+
+      - name: Install struct2ts
+        run: go install github.com/OneOfOne/struct2ts/...@latest
+
       - name: Install Wails
         if: steps.wails-cache.outputs.cache-hit != 'true'
         run: go install github.com/wailsapp/wails/v2/cmd/wails@${{ steps.cache-vars.outputs.wails-ver }}
 
       - name: Wails Doctor
         run: wails doctor
+
+      - name: Transpile TS Models
+        run: struct2ts -o ./cmd/wails/frontend/src/models.ts storage.Asset storage.User storage.QueryOptions
+
+      - name: Compile TS
+        run: tsc -p .
 
       - name: Build
         working-directory: ./cmd/wails
