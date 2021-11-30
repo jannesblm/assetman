@@ -93,9 +93,13 @@
 
 <script>
 import {Litepicker} from 'litepicker'
+import {Asset, HardwareAsset, SoftwareAsset} from "@/models";
+import {AssetDto} from "@/models.dto";
+import {Form} from "vee-validate";
+
 import SoftwareOptions from "@/components/SoftwareOptions";
 import HardwareOptions from "@/components/HardwareOptions";
-import {Asset} from "@/models.ts";
+import dayjs from "dayjs";
 
 export default {
   name: "AssetEdit",
