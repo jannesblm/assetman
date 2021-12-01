@@ -8,17 +8,13 @@ import '@tabler/core/dist/js/tabler'
 import JQuery from 'jquery'
 window.jQuery = window.$ = JQuery
 
-import lodashGet from 'lodash/get'
-import VueMask from 'vue-jquery-mask';
-
-
 import App from './App.vue'
 import HelloWorld from "@/components/HelloWorld";
 import AssetList from "@/components/AssetList";
 
 const routes = [
-    {path: '/', component: HelloWorld},
-    {path: '/asset/list', component: AssetList,},
+    {path: "/", component: HelloWorld},
+    {path: "/asset/list/:type", component: AssetList},
 ];
 
 const router = createRouter({
@@ -33,13 +29,17 @@ const store = createStore({
                 ID: 0,
                 name: '',
             },
-            assetCount: 0,
+            assetCount: {
+                hardware: 0,
+                software: 0,
+            },
             manufacturers: [],
         }
     },
     mutations: {
-        async updateAssetCount(state) {
-            state.assetCount = await window.go.sqlite.repository.CountAll()
+        async syncCount(state) {
+            state.assetCount.hardware = await window.go.sqlite.repository.CountHardware()
+            state.assetCount.software = await window.go.sqlite.repository.CountSoftware()
         },
 
         async updateManufacturers(state) {
@@ -52,10 +52,8 @@ const app = createApp(App)
 
 app.use(router)
 app.use(store)
-app.use(VueMask)
 
 // TODO debounce
-app.config.globalProperties.$get = lodashGet
 
 app.mount('#app')
 router.replace('/asset/list')
