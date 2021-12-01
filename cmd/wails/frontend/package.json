@@ -10,16 +10,18 @@
   "dependencies": {
     "@tabler/core": "^1.0.0-beta4",
     "core-js": "^3.6.5",
+    "dayjs": "^1.10.7",
     "jquery": "^3.6.0",
     "litepicker": "^2.0.12",
-    "lodash.get": "^4.4.2",
+    "lodash": "^4.17.21",
     "sass": "^1.43.5",
     "sass-loader": "^10",
+    "sweetalert2": "^11.2.1",
+    "vee-validate": "^4.5.6",
     "vue": "^3.0.0",
-    "vue-class-component": "^8.0.0-0",
-    "vue-jquery-mask": "^2.0.0",
     "vue-router": "4",
-    "vuex": "^4.0.2"
+    "vuex": "^4.0.2",
+    "yup": "^0.32.11"
   },
   "devDependencies": {
     "@vue/cli-plugin-babel": "~4.5.0",

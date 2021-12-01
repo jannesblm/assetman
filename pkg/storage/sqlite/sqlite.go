@@ -1,10 +1,12 @@
 package sqlite
 
 import (
+	"errors"
 	"github.com/cmp307/assetman/pkg/storage"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
+	"reflect"
 )
 
 type repository struct {
@@ -50,15 +52,9 @@ func (t *repository) GetById(id uint) storage.Asset {
 	return asset
 }
 
-func (t *repository) PaginateByName(needle string, options storage.QueryOptions) ([]storage.Asset, error) {
-	var assets []storage.Asset
-
+func (t *repository) paginate(options storage.QueryOptions) *gorm.DB {
 	tx := t.db.Preload(clause.Associations).
 		Order(options.Order)
-
-	if len(needle) > 0 {
-		tx.Where("name like ?", "%"+needle+"%")
-	}
 
 	if options.Limit > 0 {
 		tx.Limit(options.Limit)
@@ -68,23 +64,43 @@ func (t *repository) PaginateByName(needle string, options storage.QueryOptions)
 		tx.Offset(options.Offset)
 	}
 
+	return tx
+}
+
+func (t *repository) PaginateByName(needle string, options storage.QueryOptions) ([]storage.Asset, error) {
+	var assets []storage.Asset
+
+	tx := t.paginate(options)
+
+	if len(needle) > 0 {
+		tx.Where("name like ?", "%"+needle+"%")
+	}
+
 	err := tx.Find(&assets).
 		Error
 
 	return assets, err
 }
 
-func (t *repository) Add(asset interface{}) error {
-	switch v := asset.(type) {
-	case storage.HardwareAsset:
-		return t.db.Create(&v).Error
-	case storage.SoftwareAsset:
-		return t.db.Create(&v).Error
-	default:
-		panic("invalid type")
+func (t *repository) PaginateByTypeAndName(typ string, needle string, options storage.QueryOptions) ([]storage.Asset, error) {
+	var assets []storage.Asset
+
+	tx := t.paginate(options)
+
+	if typ != storage.TypeHardware && typ != storage.TypeSoftware {
+		return []storage.Asset{}, errors.New("invalid type")
 	}
 
-	return nil
+	tx.Where("asset_type = ?", typ)
+
+	if len(needle) > 0 {
+		tx.Where("name like ?", "%"+needle+"%")
+	}
+
+	err := tx.Find(&assets).
+		Error
+
+	return assets, err
 }
 
 func (t *repository) GetAllManufacturers() ([]storage.Manufacturer, error) {
@@ -99,6 +115,50 @@ func (t *repository) CountAll() int64 {
 	t.db.Model(&storage.Asset{}).Count(&count)
 
 	return count
+}
+
+func (t *repository) CountSoftware() int64 {
+	var count int64
+
+	t.db.Model(&storage.Asset{}).
+		Where("asset_type = ?", storage.TypeSoftware).
+		Count(&count)
+
+	return count
+}
+
+func (t *repository) CountHardware() int64 {
+	var count int64
+
+	t.db.Model(&storage.Asset{}).
+		Where("asset_type = ?", storage.TypeHardware).
+		Count(&count)
+
+	return count
+}
+
+func (t *repository) Save(asset storage.Asset) error {
+	err := t.db.
+		Model(reflect.New(asset.Type()).Interface()).
+		Clauses(
+			clause.OnConflict{
+				UpdateAll: true,
+			}).
+		Create(asset.Polymorphic()).
+		Error
+
+	if err != nil {
+		return err
+	}
+
+	asset.AssetID = asset.Polymorphic().GetID()
+
+	return t.db.
+		Session(&gorm.Session{FullSaveAssociations: true}).
+		Omit("HardwareAsset").
+		Omit("SoftwareAsset").
+		Save(&asset).
+		Error
 }
 
 func (t *repository) GetByName(name string) (storage.User, error) {
