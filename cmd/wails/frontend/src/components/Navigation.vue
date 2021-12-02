@@ -6,7 +6,7 @@
       </button>
       <h1 class="navbar-brand navbar-brand-autodark">
         <router-link to="/">
-          AssetMan
+          <img class="logo" src="scottishglen.png" alt="logo"/>
         </router-link>
       </h1>
       <div id="navbar-menu" class="collapse navbar-collapse">
@@ -112,5 +112,10 @@ export default {
 </script>
 
 <style scoped>
+@media (max-width: 991.98px) {
+  .logo {
+    width: 100px;
+  }
+}
 
 </style>
