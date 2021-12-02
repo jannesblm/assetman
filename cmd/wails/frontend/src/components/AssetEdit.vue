@@ -91,7 +91,7 @@
         <div class="col-lg-12">
           <div>
             <label class="form-label">Notes</label>
-            <textarea class="form-control" rows="3"></textarea>
+            <textarea class="form-control" rows="3" v-model="asset.Note"></textarea>
           </div>
         </div>
       </div>
@@ -99,8 +99,11 @@
         <a class="btn btn-link link-secondary" @click="$emit('close', false)">
           Cancel
         </a>
-        <button type="button" class="btn btn-primary ms-auto" @click="save($event)">
-          Create new report
+        <button type="button" class="btn btn-warning ms-auto" @click="save($event, true)">
+          Save & Search NVD
+        </button>
+        <button type="button" class="btn btn-primary" @click="save($event)">
+          Save
         </button>
       </div>
     </Form>
@@ -157,19 +160,31 @@ export default {
       }
     },
 
-    async save(e) {
+    async save(e, searchNvd = false) {
       e.preventDefault()
-
-      let error = null;
 
       try {
          await window.go.sqlite.assetRepository.Save(AssetDto.fromObject(this.asset))
       } catch (err) {
-        error = err
+        this.$emit("close", true)
+        this.$emit("message", "save", err, this.asset)
+
+        return
       }
 
-      this.$emit("close", true)
-      this.$emit("message", "save", error, this.asset)
+      if (searchNvd) {
+        this.$store.dispatch("showModal", {
+          classes: ['modal-sm', 'modal-dialog-centered'],
+
+          component: "VulnerabilityModal",
+
+          props: {
+            keyword: this.asset.Description
+          },
+        })
+      } else {
+        this.$emit("close", true)
+      }
     },
 
     onChange(asset) {
@@ -209,6 +224,7 @@ export default {
           this.manufacturerNotFound = false
           this.asset.ManufacturerID = parseInt(el.dataset.value)
           this.asset.Manufacturer.Name = el.value
+          this.asset.Manufacturer.ID = parseInt(el.dataset.value)
         } else {
           this.manufacturerNotFound = true
           this.asset.ManufacturerID = 0
@@ -232,8 +248,10 @@ export default {
   mounted() {
     this.load()
 
+    this.$store.dispatch("syncManufacturers")
+
     new Litepicker({
-      element: $('#asset-purchase-date').get(0),
+      element: document.getElementById('asset-purchase-date'),
       format: "DD/MM/YYYY",
       buttonText: {
         previousMonth: `<i class="ti ti-chevron-left">`,

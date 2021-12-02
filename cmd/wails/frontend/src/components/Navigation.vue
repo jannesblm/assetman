@@ -6,7 +6,7 @@
       </button>
       <h1 class="navbar-brand navbar-brand-autodark">
         <router-link to="/">
-          AssetMan
+          <img class="logo" src="scottishglen.png" alt="logo"/>
         </router-link>
       </h1>
       <div id="navbar-menu" class="collapse navbar-collapse">
@@ -52,6 +52,17 @@
               </span>
               <span class="nav-link-title">
                   Manufacturers
+              </span>
+            </router-link>
+          </li>
+          <li class="nav-item">
+            <router-link :class="[{'active': $route.name === 'backup'}, 'nav-link']"
+                         to="/backup">
+              <span class="nav-link-icon d-md-none d-lg-inline-block">
+                <i class="ti ti-download"></i>
+              </span>
+              <span class="nav-link-title">
+                  Backup
               </span>
             </router-link>
           </li>
@@ -101,5 +112,10 @@ export default {
 </script>
 
 <style scoped>
+@media (max-width: 991.98px) {
+  .logo {
+    width: 100px;
+  }
+}
 
 </style>

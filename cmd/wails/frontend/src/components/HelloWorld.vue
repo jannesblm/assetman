@@ -1,14 +1,23 @@
 <template>
   <div class="hello">
-    <h1>hello1</h1>
+    <h1 @click="showModal">hello1</h1>
   </div>
 </template>
 
 <script>
 export default {
   name: 'HelloWorld',
+
   props: {
     msg: String
+  },
+
+  methods: {
+    showModal() {
+      this.$store.dispatch("showModal", {
+        callback: (status) => console.log("Modal status:", status)
+      })
+    }
   }
 }
 </script>

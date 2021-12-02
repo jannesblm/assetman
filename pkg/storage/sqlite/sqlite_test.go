@@ -3,12 +3,10 @@ package sqlite
 import (
 	"database/sql"
 	"github.com/DATA-DOG/go-sqlmock"
-	"github.com/cmp307/assetman/pkg/storage"
 	"github.com/stretchr/testify/require"
 	ts "github.com/stretchr/testify/suite"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
-	"regexp"
 	"testing"
 )
 
@@ -45,21 +43,7 @@ func (s *suite) SetupSuite() {
 	s.DB, err = gorm.Open(newSqliteDialector(db))
 	require.NoError(s.T(), err)
 
-	s.repository = NewRepository(s.DB)
-}
-
-func (s *suite) Test_Asset_GetAll() {
-	assetStub := storage.Asset{
-		Name: "",
-	}
-
-	s.mock.ExpectQuery(regexp.QuoteMeta("SELECT * FROM `assets` WHERE `assets`.`deleted_at` IS NULL")).
-		WillReturnRows(
-			sqlmock.NewRows([]string{"id", "name"}).
-				AddRow(assetStub.ID, assetStub.Name))
-
-	_, err := s.repository.GetAll()
-	require.NoError(s.T(), err)
+	s.repository = &repository{s.DB}
 }
 
 func (s *suite) AfterTest(_, _ string) {

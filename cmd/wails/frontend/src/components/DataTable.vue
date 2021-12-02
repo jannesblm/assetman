@@ -1,6 +1,6 @@
 <template>
   <div class="card">
-    <div class="card-body border-bottom py-3">
+    <div v-if="showHeader" class="card-body border-bottom py-3">
       <div class="d-flex flex-column flex-lg-row">
         <div class="ms-auto mb-3 mb-lg-0 ms-lg-0 text-muted">
           Show
@@ -10,7 +10,7 @@
           </div>
           entries
         </div>
-        <div class="ms-auto text-muted d-flex">
+        <div v-if="searchableColumns.length > 0" class="ms-auto text-muted d-flex">
           Search:
           <div class="ms-2 input-group">
             <select id="query-field" v-model="queryFieldIndex" class="form-select form-control-sm ms-2 w-25">
@@ -27,6 +27,7 @@
       <table class="table table-vcenter card-table">
         <thead>
         <tr>
+          <th v-if="checkboxes"></th>
           <th v-for="(column, index) in columns" :key="column" :class="column.class">
             <span
                 :class="[{'text-green font-weight-extrabold': sortIndex === index, 'cursor-pointer': isSortable(column)}, 'd-flex']"
@@ -42,23 +43,26 @@
         </tr>
         </thead>
         <tbody v-if="rows.length > 0">
-          <tr  v-for="(row, index) in rows" :key="index">
-            <td v-for="(column, index) in modelColumns" :key="index">
-              <div class="column-content">{{ forEach(column)(get(row, column.property)) }}</div>
-            </td>
-            <slot :row="row"></slot>
-          </tr>
+        <tr v-for="(row, index) in rows" :key="index">
+          <td v-if="checkboxes && has(row, 'checked')">
+            <input class="form-check-input" type="checkbox">
+          </td>
+          <td v-for="(column, index) in modelColumns" :key="index">
+            <div class="column-content">{{ forEach(column)(get(row, column.property)) }}</div>
+          </td>
+          <slot :row="row"></slot>
+        </tr>
         </tbody>
         <tbody v-else>
-          <tr>
-            <td :colspan="columns.length" class="text-center">
-              <small>No results found ({{ queryFieldLabel }})</small>
-            </td>
-          </tr>
+        <tr>
+          <td :colspan="columns.length" class="text-center">
+            <small>No results found</small>
+          </td>
+        </tr>
         </tbody>
       </table>
     </div>
-    <div class="card-footer d-flex align-items-center">
+    <div v-if="showFooter" class="card-footer d-flex align-items-center">
       <p class="m-0 text-muted">Showing {{ offset > 0 ? offset : 1 }} to {{ offset + rows.length }} of {{ total }}
         entries</p>
       <ul class="pagination m-0 ms-auto">
@@ -89,6 +93,18 @@ export default {
   emits: ["update"],
 
   props: {
+    checkboxes: {
+      type: Boolean,
+      required: false,
+      default: false,
+    },
+
+    checkboxProp: {
+      type: String,
+      required: false,
+      default: "",
+    },
+
     columns: {
       type: Array,
       required: true,
@@ -117,6 +133,18 @@ export default {
         return 0;
       }
     },
+
+    showHeader: {
+      type: Boolean,
+      required: false,
+      default: true,
+    },
+
+    showFooter: {
+      type: Boolean,
+      required: false,
+      default: true,
+    }
   },
 
   data() {
@@ -137,9 +165,9 @@ export default {
 
     toSnakeCase: function (str) {
       return str && str
-              .match(/[A-Z]{2,}(?=[A-Z][a-z]+[0-9]*|\b)|[A-Z]?[a-z]+[0-9]*|[A-Z]|[0-9]+/g)
-              .map(x => x.toLowerCase())
-              .join('_');
+          .match(/[A-Z]{2,}(?=[A-Z][a-z]+[0-9]*|\b)|[A-Z]?[a-z]+[0-9]*|[A-Z]|[0-9]+/g)
+          .map(x => x.toLowerCase())
+          .join('_');
     },
 
     isSortable: function (col) {

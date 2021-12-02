@@ -1,9 +1,9 @@
 import {createApp} from "vue"
 import {createMemoryHistory, createRouter} from "vue-router"
 import {createStore} from "vuex"
-import {get, has, isObjectLike, unset} from "lodash"
+import {get, has, isObjectLike, unset, extend} from "lodash"
+
 import dayjs from "dayjs";
-import JQuery from 'jquery'
 
 import '@tabler/core/dist/css/tabler.css'
 import '@tabler/core/dist/js/tabler'
@@ -15,14 +15,15 @@ import Login from "@/components/Login";
 import ManufacturerList from "@/components/ManufacturerList";
 import ErrorModal from "@/components/ErrorModal";
 import AssetEdit from "@/components/AssetEdit";
-
-window.jQuery = window.$ = JQuery
+import Backup from "@/components/Backup";
+import VulnerabilityModal from "@/components/VulnerabilityModal";
 
 window._ = {
     has,
     get,
     isObjectLike,
     unset,
+    extend
 }
 
 const routes = [
@@ -30,6 +31,7 @@ const routes = [
     {path: "/login", name: "login", component: Login},
     {path: "/asset/list/:type", name: "assets", component: AssetList},
     {path: "/manufacturers", name: "manufacturers", component: ManufacturerList},
+    {path: "/backup", name: "backup", component: Backup},
 ]
 
 const router = createRouter({
@@ -112,7 +114,6 @@ const store = createStore({
         },
 
         handleModalMessage({state}, message) {
-            console.log(_.has(state.modal.on, message.type))
             _.has(state.modal.on, message.type) && state.modal.on[message.type](...message.args)
         },
 
@@ -134,13 +135,14 @@ const app = createApp(App)
 
 app.component("ErrorModal", ErrorModal)
 app.component("AssetEditModal", AssetEdit)
+app.component("VulnerabilityModal", VulnerabilityModal)
 
 app.use(router)
 app.use(store)
 
 app.config.globalProperties.$dayjs = dayjs
 
-app.config.globalProperties.$showError = function (title, description) {
+app.config.globalProperties.$showDialog = function (title, description, success = false) {
     let timeout = 0
 
     if (store.state.modal.show) {
@@ -154,7 +156,7 @@ app.config.globalProperties.$showError = function (title, description) {
             component: "ErrorModal",
             props: {
                 opts: Object.assign(ErrorModal.props.opts.default(), {
-                    success: false,
+                    success: success,
                     showCancel: false,
                     confirmText: "OK",
                     title: title,
