@@ -54,6 +54,16 @@
     </div>
   </fieldset>
   <div class="row">
+    <div class="mb-3">
+      <div class="form-label">Installed Software</div>
+      <select v-model="installedSoftware" class="form-control" multiple>
+        <option v-for="(software, index) in software" :key="index" :value="software.ID">{{ software.Name }}
+          {{ software.SoftwareAsset.Version }}
+        </option>
+      </select>
+    </div>
+  </div>
+  <div class="row">
     <div class="col-lg-12">
       <div>
         <label class="form-label">Warranty info</label>
@@ -67,7 +77,7 @@
 import {HardwareAsset} from "@/models";
 
 import * as yup from 'yup';
-import {Field, ErrorMessage} from "vee-validate";
+import {ErrorMessage, Field} from "vee-validate";
 
 export default {
   name: "HardwareOptions",
@@ -88,13 +98,18 @@ export default {
 
   data() {
     return {
-      asset: null,
+      asset: new HardwareAsset({
+        InstalledSoftware: new Array(),
+      }),
+
       rules: {
         macAddress: yup.string()
             .required()
             .matches(/^([0-9A-Fa-f]{2}[:-]){5}([0-9A-Fa-f]{2})$/,
                 "Not a valid MAC address (AA:BB:CC:DD:EE:FF)"),
-      }
+      },
+
+      software: [],
     }
   },
 
@@ -102,13 +117,19 @@ export default {
     this.asset = this.initialAsset
   },
 
+  async mounted() {
+    this.software = await window.go.sqlite.assetRepository.GetAllSoftware()
+  },
+
   watch: {
     initialAsset: {
-      handler: function (newVal) {
+      handler: async function (newVal) {
         this.asset = newVal
       },
+
       deep: true,
     },
+
     asset: {
       handler: function () {
         this.$emit("changed", this.asset)
@@ -116,6 +137,22 @@ export default {
       deep: true,
     },
   },
+
+  computed: {
+    installedSoftware: {
+      get: function () {
+        if (!_.has(this.asset, "InstalledSoftware") || this.asset.InstalledSoftware === null) {
+          return []
+        }
+
+        return this.asset.InstalledSoftware.map(s => s.ID)
+      },
+
+      set: function (ids) {
+        this.asset.InstalledSoftware = this.software.filter(s => ids.indexOf(s.ID) !== -1)
+      }
+    },
+  }
 }
 </script>
 

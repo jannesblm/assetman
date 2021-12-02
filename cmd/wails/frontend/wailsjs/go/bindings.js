@@ -87,6 +87,13 @@ const go = {
         return window.go.sqlite.assetRepository.Delete(arg1);
       },
       /**
+       * GetAllSoftware
+       * @returns {Promise<Array.<Asset>|Error>}  - Go Type: []storage.Asset
+       */
+      "GetAllSoftware": () => {
+        return window.go.sqlite.assetRepository.GetAllSoftware();
+      },
+      /**
        * GetById
        * @param {number} arg1 - Go Type: uint
        * @returns {Promise<Asset>}  - Go Type: storage.Asset
@@ -158,6 +165,34 @@ const go = {
        */
       "Paginate": (arg1) => {
         return window.go.sqlite.manufRepository.Paginate(arg1);
+      },
+    },
+  },
+
+  "vulnerability": {
+    "service": {
+      /**
+       * GetLastCpe
+       * @returns {Promise<Array.<Cpe>>}  - Go Type: []vulnerability.Cpe
+       */
+      "GetLastCpe": () => {
+        return window.go.vulnerability.service.GetLastCpe();
+      },
+      /**
+       * SearchCpeByKeyword
+       * @param {string} arg1 - Go Type: string
+       * @returns {Promise<void>} 
+       */
+      "SearchCpeByKeyword": (arg1) => {
+        return window.go.vulnerability.service.SearchCpeByKeyword(arg1);
+      },
+      /**
+       * SearchCveByKeyword
+       * @param {string} arg1 - Go Type: string
+       * @returns {Promise<Array.<Cve>|Error>}  - Go Type: []vulnerability.Cve
+       */
+      "SearchCveByKeyword": (arg1) => {
+        return window.go.vulnerability.service.SearchCveByKeyword(arg1);
       },
     },
   },

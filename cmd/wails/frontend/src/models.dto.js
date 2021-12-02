@@ -19,7 +19,7 @@ class AssetDto {
      * @param asset<Asset>
      */
     static fromObject(asset) {
-        let dto = $.extend(true, new AssetDto(), asset)
+        let dto = _.extend(new AssetDto(), asset)
 
         _.unset(dto, 'SoftwareAsset.Asset')
         _.unset(dto, 'HardwareAsset.Asset')

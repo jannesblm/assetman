@@ -87,7 +87,7 @@ jobs:
         run: wails doctor
 
       - name: Transpile TS Models
-        run: struct2ts -o ./cmd/wails/frontend/src/models.ts storage.Asset storage.User storage.QueryOptions
+        run: struct2ts -o ./cmd/wails/frontend/src/models.ts storage.Asset storage.User storage.QueryOptions vulnerability.Cpe
 
       - name: Compile TS
         working-directory: ./cmd/wails/frontend
