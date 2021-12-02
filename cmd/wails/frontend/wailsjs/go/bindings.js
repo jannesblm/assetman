@@ -89,6 +89,13 @@ const go = {
         return window.go.sqlite.manufRepository.CountAll();
       },
       /**
+       * GetAll
+       * @returns {Promise<Array.<Manufacturer>|Error>}  - Go Type: []storage.Manufacturer
+       */
+      "GetAll": () => {
+        return window.go.sqlite.manufRepository.GetAll();
+      },
+      /**
        * GetById
        * @param {number} arg1 - Go Type: uint
        * @returns {Promise<Manufacturer>}  - Go Type: storage.Manufacturer
