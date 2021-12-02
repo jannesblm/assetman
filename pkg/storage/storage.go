@@ -80,29 +80,34 @@ type Manufacturer struct {
 	Name string `gorm:"uniqueIndex"`
 }
 
-type User struct {
-	gorm.Model
-	Name     string
-	Password []byte `gorm:"size:60"`
+type QueryOptions struct {
+	Query      string
+	QueryField string
+	Limit      int
+	Offset     int
+	Order      string `default:"id desc"`
 }
 
-type QueryOptions struct {
-	Limit  int
-	Offset int
-	Order  string `default:"id desc"`
+type User struct {
+	gorm.Model
+	Name        string
+	Password    []byte          `gorm:"size:60"`
+	Permissions []SoftwareAsset `gorm:"many2many:hardware_software"`
 }
 
 type AssetRepository interface {
 	CountAll() int64
 	CountHardware() int64
 	CountSoftware() int64
-	// GetAll retrieves all stored assets from the database.
-	GetAll() ([]Asset, error)
-	GetAllManufacturers() ([]Manufacturer, error)
 	GetById(uint) Asset
-	PaginateByName(string, QueryOptions) ([]Asset, error)
-	PaginateByTypeAndName(string, string, QueryOptions) ([]Asset, error)
+	Paginate(string, QueryOptions) ([]Asset, error)
 	Save(Asset) error
+	Delete(Asset) error
+}
+
+type ManufacturerRepository interface {
+	CountAll() int64
+	Paginate(QueryOptions) ([]Manufacturer, error)
 }
 
 type UserRepository interface {
