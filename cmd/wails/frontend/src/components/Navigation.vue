@@ -1,5 +1,5 @@
 <template>
-  <aside class="navbar navbar-vertical navbar-expand-lg navbar-dark">
+  <aside :class="[{'navbar-dark': darkMode, 'navbar-transparent': !darkMode}, 'navbar', 'navbar-vertical', 'navbar-expand-lg']">
     <div class="container-fluid">
       <button class="navbar-toggler" data-bs-target="#navbar-menu" data-bs-toggle="collapse" type="button">
         <span class="navbar-toggler-icon"></span>
@@ -12,7 +12,7 @@
       <div id="navbar-menu" class="collapse navbar-collapse">
         <ul class="navbar-nav pt-lg-3">
           <li class="nav-item">
-            <router-link class="nav-link" href="./index.html" to="/">
+            <router-link :class="[{'active': $route.name === 'home'}, 'nav-link']" to="/">
               <span class="nav-link-icon d-md-none d-lg-inline-block">
                 <i class="ti ti-layout-2"></i>
               </span>
@@ -32,10 +32,35 @@
               </span>
             </a>
             <div class="dropdown-menu" data-bs-popper="none">
-              <router-link to="/asset/list" class="dropdown-item">
-                List
+              <router-link
+                  :class="[{'active': $route.name === 'assets' && $route.params.type === 'hardware'}, 'dropdown-item']"
+                  to="/asset/list/hardware">
+                Hardware
+              </router-link>
+              <router-link
+                  :class="[{'active': $route.name === 'assets' && $route.params.type === 'software'}, 'dropdown-item']"
+                  to="/asset/list/software">
+                Software
               </router-link>
             </div>
+          </li>
+          <li class="nav-item">
+            <router-link :class="[{'active': $route.name === 'manufacturers'}, 'nav-link']"
+                         to="/manufacturers">
+              <span class="nav-link-icon d-md-none d-lg-inline-block">
+                <i class="ti ti-users"></i>
+              </span>
+              <span class="nav-link-title">
+                  Manufacturers
+              </span>
+            </router-link>
+          </li>
+          <li class="flex-grow-1"></li>
+          <li style="padding: 0.5rem 1.5rem">
+            <label class="form-check form-switch">
+              <input class="form-check-input cursor-pointer" type="checkbox" v-model="darkMode">
+              <span class="form-check-label">Dark Mode</span>
+            </label>
           </li>
         </ul>
       </div>
@@ -45,7 +70,33 @@
 
 <script>
 export default {
-  name: "Navigation"
+  name: "Navigation",
+
+  data() {
+    return {
+      darkMode: false,
+    }
+  },
+
+  methods: {
+    setDarkMode: function() {
+      if (this.darkMode) {
+        document.body.classList.add('theme-dark');
+      } else {
+        document.body.classList.remove('theme-dark');
+      }
+    },
+  },
+
+  watch: {
+    darkMode: function () {
+      this.setDarkMode()
+    }
+  },
+
+  mounted() {
+    this.setDarkMode()
+  }
 }
 </script>
 

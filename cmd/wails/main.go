@@ -27,13 +27,15 @@ func main() {
 	app := NewApp()
 
 	db, err := sqlite.Connect()
-	ar := sqlite.NewRepository(db)
+
+	ar := sqlite.NewAssetRepository(db)
+	mr := sqlite.NewManufacturerRepository(db)
 
 	// Create application with options
 	opts := &options.App{
 		Title:             "AssetMan",
-		Width:             720,
-		Height:            570,
+		Width:             1250,
+		Height:            488,
 		MinWidth:          720,
 		MinHeight:         570,
 		DisableResize:     false,
@@ -50,6 +52,7 @@ func main() {
 		Bind: []interface{}{
 			app,
 			ar,
+			mr,
 		},
 		// Windows platform specific options
 		Windows: &windows.Options{

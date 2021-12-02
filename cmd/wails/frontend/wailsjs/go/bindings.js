@@ -16,41 +16,35 @@ const go = {
   },
 
   "sqlite": {
-    "repository": {
+    "assetRepository": {
       /**
        * CountAll
        * @returns {Promise<number>}  - Go Type: int64
        */
       "CountAll": () => {
-        return window.go.sqlite.repository.CountAll();
+        return window.go.sqlite.assetRepository.CountAll();
       },
       /**
        * CountHardware
        * @returns {Promise<number>}  - Go Type: int64
        */
       "CountHardware": () => {
-        return window.go.sqlite.repository.CountHardware();
+        return window.go.sqlite.assetRepository.CountHardware();
       },
       /**
        * CountSoftware
        * @returns {Promise<number>}  - Go Type: int64
        */
       "CountSoftware": () => {
-        return window.go.sqlite.repository.CountSoftware();
+        return window.go.sqlite.assetRepository.CountSoftware();
       },
       /**
-       * GetAll
-       * @returns {Promise<Array.<Asset>|Error>}  - Go Type: []storage.Asset
+       * Delete
+       * @param {Asset} arg1 - Go Type: storage.Asset
+       * @returns {Promise<Error>}  - Go Type: error
        */
-      "GetAll": () => {
-        return window.go.sqlite.repository.GetAll();
-      },
-      /**
-       * GetAllManufacturers
-       * @returns {Promise<Array.<Manufacturer>|Error>}  - Go Type: []storage.Manufacturer
-       */
-      "GetAllManufacturers": () => {
-        return window.go.sqlite.repository.GetAllManufacturers();
+      "Delete": (arg1) => {
+        return window.go.sqlite.assetRepository.Delete(arg1);
       },
       /**
        * GetById
@@ -58,7 +52,7 @@ const go = {
        * @returns {Promise<Asset>}  - Go Type: storage.Asset
        */
       "GetById": (arg1) => {
-        return window.go.sqlite.repository.GetById(arg1);
+        return window.go.sqlite.assetRepository.GetById(arg1);
       },
       /**
        * GetByName
@@ -66,26 +60,16 @@ const go = {
        * @returns {Promise<User|Error>}  - Go Type: storage.User
        */
       "GetByName": (arg1) => {
-        return window.go.sqlite.repository.GetByName(arg1);
+        return window.go.sqlite.assetRepository.GetByName(arg1);
       },
       /**
-       * PaginateByName
+       * Paginate
        * @param {string} arg1 - Go Type: string
        * @param {QueryOptions} arg2 - Go Type: storage.QueryOptions
        * @returns {Promise<Array.<Asset>|Error>}  - Go Type: []storage.Asset
        */
-      "PaginateByName": (arg1, arg2) => {
-        return window.go.sqlite.repository.PaginateByName(arg1, arg2);
-      },
-      /**
-       * PaginateByTypeAndName
-       * @param {string} arg1 - Go Type: string
-       * @param {string} arg2 - Go Type: string
-       * @param {QueryOptions} arg3 - Go Type: storage.QueryOptions
-       * @returns {Promise<Array.<Asset>|Error>}  - Go Type: []storage.Asset
-       */
-      "PaginateByTypeAndName": (arg1, arg2, arg3) => {
-        return window.go.sqlite.repository.PaginateByTypeAndName(arg1, arg2, arg3);
+      "Paginate": (arg1, arg2) => {
+        return window.go.sqlite.assetRepository.Paginate(arg1, arg2);
       },
       /**
        * Save
@@ -93,7 +77,40 @@ const go = {
        * @returns {Promise<Error>}  - Go Type: error
        */
       "Save": (arg1) => {
-        return window.go.sqlite.repository.Save(arg1);
+        return window.go.sqlite.assetRepository.Save(arg1);
+      },
+    },
+    "manufRepository": {
+      /**
+       * CountAll
+       * @returns {Promise<number>}  - Go Type: int64
+       */
+      "CountAll": () => {
+        return window.go.sqlite.manufRepository.CountAll();
+      },
+      /**
+       * GetById
+       * @param {number} arg1 - Go Type: uint
+       * @returns {Promise<Manufacturer>}  - Go Type: storage.Manufacturer
+       */
+      "GetById": (arg1) => {
+        return window.go.sqlite.manufRepository.GetById(arg1);
+      },
+      /**
+       * GetByName
+       * @param {string} arg1 - Go Type: string
+       * @returns {Promise<User|Error>}  - Go Type: storage.User
+       */
+      "GetByName": (arg1) => {
+        return window.go.sqlite.manufRepository.GetByName(arg1);
+      },
+      /**
+       * Paginate
+       * @param {QueryOptions} arg1 - Go Type: storage.QueryOptions
+       * @returns {Promise<Array.<Manufacturer>|Error>}  - Go Type: []storage.Manufacturer
+       */
+      "Paginate": (arg1) => {
+        return window.go.sqlite.manufRepository.Paginate(arg1);
       },
     },
   },
