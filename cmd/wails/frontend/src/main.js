@@ -52,6 +52,8 @@ const store = createStore({
                 manufacturers: 0,
             },
 
+            manufacturers: [],
+
             modal: {
                 show: false,
                 component: "ErrorModal",
@@ -90,9 +92,13 @@ const store = createStore({
             state.modal.show = false
         },
 
-        async setAssetCounts(state, count) {
+        setAssetCounts(state, count) {
             state.count = count
         },
+
+        setManufacturers(state, list) {
+            state.manufacturers = list
+        }
     },
 
     actions: {
@@ -105,6 +111,11 @@ const store = createStore({
             _.has(state.modal.on, "close") && state.modal.on.close(status)
         },
 
+        handleModalMessage({state}, message) {
+            console.log(_.has(state.modal.on, message.type))
+            _.has(state.modal.on, message.type) && state.modal.on[message.type](...message.args)
+        },
+
         async syncAssetCounts({ commit }) {
             commit("setAssetCounts", {
                 hardware: await window.go.sqlite.assetRepository.CountHardware(),
@@ -113,10 +124,9 @@ const store = createStore({
             })
         },
 
-        handleModalMessage({state}, message) {
-            console.log(_.has(state.modal.on, message.type))
-            _.has(state.modal.on, message.type) && state.modal.on[message.type](...message.args)
-        }
+        async syncManufacturers({ commit }) {
+            commit("setManufacturers", await window.go.sqlite.manufRepository.GetAll())
+        },
     }
 })
 

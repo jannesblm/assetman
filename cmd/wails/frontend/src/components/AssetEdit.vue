@@ -62,8 +62,11 @@
           </div>
           <div class="col-lg-6">
             <div class="mb-3">
-              <label class="form-label">Manufacturer</label>
-              <input id="asset-manufacturer" v-model="asset.Manufacturer.Name"
+              <label class="form-label">
+                Manufacturer
+                <span v-if="manufacturerNotFound" class="badge bg-blue-lt">Creating New</span>
+              </label>
+              <input id="asset-manufacturer" v-model="manufacturer"
                      autocomplete="off"
                      class="form-control"
                      list="manufacturer-list"
@@ -136,6 +139,8 @@ export default {
         'HardwareAsset': new HardwareAsset(),
         'SoftwareAsset': new SoftwareAsset()
       }),
+
+      manufacturerNotFound: false
     }
   },
 
@@ -183,18 +188,36 @@ export default {
     id: function () {
       this.load()
     },
-
-    'asset.Manufacturer.Name': function (newVal) {
-      let id = $("#manufacturer-list option[value='" + newVal.toString() + "']").data('value')
-
-      if (id) {
-        this.asset.ManufacturerID = id
-        this.asset.Manufacturer.ID = id
-      }
-    },
   },
 
   computed: {
+    manufacturer: {
+      get: function () {
+        return this.asset.Manufacturer.Name
+      },
+
+      set: function (newVal) {
+        if (newVal === "") {
+          this.manufacturerNotFound = false
+          return
+        }
+
+        let el = document.querySelector("#manufacturer-list option[value='"
+            + newVal.replace(/["\\]/g, '\\$&') + "']");
+
+        if (el) {
+          this.manufacturerNotFound = false
+          this.asset.ManufacturerID = parseInt(el.dataset.value)
+          this.asset.Manufacturer.Name = el.value
+        } else {
+          this.manufacturerNotFound = true
+          this.asset.ManufacturerID = 0
+          this.asset.Manufacturer.ID = 0
+          this.asset.Manufacturer.Name = newVal
+        }
+      }
+    },
+
     purchaseDate: {
       get: function () {
         return dayjs(this.asset.PurchaseDate).format("DD/MM/YYYY")

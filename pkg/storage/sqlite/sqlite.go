@@ -152,17 +152,23 @@ func (t *assetRepository) Save(asset storage.Asset) error {
 		Create(asset.Polymorphic()).
 		Error
 
+	err = t.db.FirstOrCreate(&asset.Manufacturer,
+		&storage.Manufacturer{
+			Name: asset.Manufacturer.Name,
+		},
+	).Error
+
 	if err != nil {
 		return err
 	}
 
 	asset.AssetID = asset.Polymorphic().GetID()
+	asset.ManufacturerID = asset.Manufacturer.ID
 
 	return t.db.
-		Session(&gorm.Session{FullSaveAssociations: true}).
-		Omit("HardwareAsset").
-		Omit("SoftwareAsset").
+		Session(&gorm.Session{FullSaveAssociations: false}).
 		Save(&asset).
+		Debug().
 		Error
 }
 
@@ -193,6 +199,13 @@ func (t *manufRepository) GetById(id uint) storage.Manufacturer {
 		First(&manufacturer)
 
 	return manufacturer
+}
+
+func (t *manufRepository) GetAll() ([]storage.Manufacturer, error) {
+	var all []storage.Manufacturer
+	err := t.db.Find(&all).Error
+
+	return all, err
 }
 
 func (t *manufRepository) Paginate(options storage.QueryOptions) ([]storage.Manufacturer, error) {

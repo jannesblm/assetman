@@ -106,6 +106,7 @@ type AssetRepository interface {
 }
 
 type ManufacturerRepository interface {
+	GetAll() ([]Manufacturer, error)
 	CountAll() int64
 	Paginate(QueryOptions) ([]Manufacturer, error)
 }

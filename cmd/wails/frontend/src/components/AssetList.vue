@@ -91,7 +91,7 @@ export default {
             await window.go.sqlite.assetRepository.Paginate(
                 this.$route.params.type, {
                   Query: _.has(opts, 'query') ? opts.query : '',
-                  //QueryField: _.has(opts, 'queryField') ? opts.queryField : 'name',
+                  QueryField: _.has(opts, 'queryField') ? opts.queryField : 'name',
                   Limit: _.has(opts, 'limit') ? opts.limit : 10,
                   Offset: _.has(opts, 'offset') ? opts.offset : 0,
                   Order: _.has(opts, 'sort') ? opts.sort : "id desc",
@@ -156,7 +156,9 @@ export default {
       handler() {
         if (this.$route.name === "assets") {
           this.load()
+
           this.$store.dispatch("syncAssetCounts")
+          this.$store.dispatch("syncManufacturers")
         }
       },
 
