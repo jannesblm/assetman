@@ -99,7 +99,7 @@ export default {
             )
         ).map(a => new Asset(a))
       } catch (error) {
-        this.$showError("An error occurred", error)
+        this.$showDialog("An error occurred", error)
       }
     },
 
@@ -131,7 +131,7 @@ export default {
             try {
               await window.go.sqlite.assetRepository.Delete(AssetDto.fromObject(asset))
             } catch (error) {
-              this.$showError("Error deleting asset", error)
+              this.$showDialog("Error deleting asset", error)
             }
 
             await this.load()
@@ -140,7 +140,7 @@ export default {
 
     onSave(error) {
       if (error !== null) {
-        this.$showError("An error occurred", error)
+        this.$showDialog("An error occurred", error)
       }
 
       this.load()

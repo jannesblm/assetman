@@ -2,6 +2,7 @@ package main
 
 import (
 	"embed"
+	"github.com/cmp307/assetman/pkg/backup"
 	"github.com/cmp307/assetman/pkg/storage/sqlite"
 	_ "github.com/cmp307/assetman/pkg/storage/sqlite"
 	_ "github.com/cmp307/assetman/pkg/vulnerability"
@@ -11,6 +12,7 @@ import (
 	"github.com/wailsapp/wails/v2/pkg/options"
 	"github.com/wailsapp/wails/v2/pkg/options/windows"
 	"log"
+	"path/filepath"
 )
 
 //go:embed frontend/dist
@@ -26,10 +28,13 @@ func main() {
 	// Create an instance of the app structure
 	app := NewApp()
 
-	db, err := sqlite.Connect()
+	path := filepath.FromSlash(app.ctx.Value("HomeDir").(string) + "/assets.db")
+	db, err := sqlite.Connect(path)
 
 	ar := sqlite.NewAssetRepository(db)
 	mr := sqlite.NewManufacturerRepository(db)
+
+	bak := backup.NewService(app.ctx)
 
 	// Create application with options
 	opts := &options.App{
@@ -53,6 +58,7 @@ func main() {
 			app,
 			ar,
 			mr,
+			bak,
 		},
 		// Windows platform specific options
 		Windows: &windows.Options{

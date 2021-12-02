@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"os"
 )
 
 // App application struct
@@ -12,12 +13,29 @@ type App struct {
 
 // NewApp creates a new App application struct
 func NewApp() *App {
-	return &App{}
+	home, err := os.UserHomeDir()
+
+	if err != nil {
+		panic("cannot get home dir")
+	}
+
+	home = home + "/ScottishGlen"
+
+	err = os.MkdirAll(home, os.ModePerm)
+
+	if err != nil {
+		panic("cannot setup app dir")
+	}
+
+	ctx := context.WithValue(context.TODO(), "HomeDir", home)
+
+	return &App{
+		ctx: ctx,
+	}
 }
 
 // startup is called at application startup
 func (b *App) startup(ctx context.Context) {
-	// Perform your setup here
 	b.ctx = ctx
 }
 

@@ -15,6 +15,7 @@ import Login from "@/components/Login";
 import ManufacturerList from "@/components/ManufacturerList";
 import ErrorModal from "@/components/ErrorModal";
 import AssetEdit from "@/components/AssetEdit";
+import Backup from "@/components/Backup";
 
 window.jQuery = window.$ = JQuery
 
@@ -30,6 +31,7 @@ const routes = [
     {path: "/login", name: "login", component: Login},
     {path: "/asset/list/:type", name: "assets", component: AssetList},
     {path: "/manufacturers", name: "manufacturers", component: ManufacturerList},
+    {path: "/backup", name: "backup", component: Backup},
 ]
 
 const router = createRouter({
@@ -112,7 +114,6 @@ const store = createStore({
         },
 
         handleModalMessage({state}, message) {
-            console.log(_.has(state.modal.on, message.type))
             _.has(state.modal.on, message.type) && state.modal.on[message.type](...message.args)
         },
 
@@ -140,7 +141,7 @@ app.use(store)
 
 app.config.globalProperties.$dayjs = dayjs
 
-app.config.globalProperties.$showError = function (title, description) {
+app.config.globalProperties.$showDialog = function (title, description, success = false) {
     let timeout = 0
 
     if (store.state.modal.show) {
@@ -154,7 +155,7 @@ app.config.globalProperties.$showError = function (title, description) {
             component: "ErrorModal",
             props: {
                 opts: Object.assign(ErrorModal.props.opts.default(), {
-                    success: false,
+                    success: success,
                     showCancel: false,
                     confirmText: "OK",
                     title: title,

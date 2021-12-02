@@ -55,3 +55,17 @@ export class Manufacturer {
 }
 
 
+
+
+export class Backup {
+
+
+    static createFrom(source: any = {}) {
+        return new Backup(source);
+    }
+
+    constructor(source: any = {}) {
+        if ('string' === typeof source) source = JSON.parse(source);
+
+    }
+}
