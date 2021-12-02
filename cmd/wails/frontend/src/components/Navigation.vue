@@ -55,6 +55,17 @@
               </span>
             </router-link>
           </li>
+          <li class="nav-item">
+            <router-link :class="[{'active': $route.name === 'backup'}, 'nav-link']"
+                         to="/backup">
+              <span class="nav-link-icon d-md-none d-lg-inline-block">
+                <i class="ti ti-download"></i>
+              </span>
+              <span class="nav-link-title">
+                  Backup
+              </span>
+            </router-link>
+          </li>
           <li class="flex-grow-1"></li>
           <li style="padding: 0.5rem 1.5rem">
             <label class="form-check form-switch">

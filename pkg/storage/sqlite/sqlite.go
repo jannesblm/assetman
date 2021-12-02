@@ -29,8 +29,8 @@ type userRepository struct {
 	repository
 }
 
-func Connect() (*gorm.DB, error) {
-	return gorm.Open(sqlite.Open("gorm.db"), &gorm.Config{
+func Connect(path string) (*gorm.DB, error) {
+	return gorm.Open(sqlite.Open(path), &gorm.Config{
 		DisableForeignKeyConstraintWhenMigrating: true,
 	})
 }
