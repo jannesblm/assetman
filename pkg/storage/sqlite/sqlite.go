@@ -84,10 +84,23 @@ func (t *assetRepository) GetById(id uint) storage.Asset {
 	var asset storage.Asset
 
 	t.db.Preload(clause.Associations).
+		Preload("HardwareAsset.InstalledSoftware").
 		Where("id = ?", id).
 		First(&asset)
 
 	return asset
+}
+
+func (t *assetRepository) GetAllSoftware() ([]storage.Asset, error) {
+	var all []storage.Asset
+
+	err := t.db.Preload("SoftwareAsset").
+		Select("ID", "Name", "AssetID").
+		Where("asset_type = ?", storage.TypeSoftware).
+		Find(&all).
+		Error
+
+	return all, err
 }
 
 func (t *assetRepository) Paginate(typ string, options storage.QueryOptions) ([]storage.Asset, error) {
@@ -157,6 +170,18 @@ func (t *assetRepository) Save(asset storage.Asset) error {
 			Name: asset.Manufacturer.Name,
 		},
 	).Error
+
+	if asset.AssetType == storage.TypeHardware {
+		installed := asset.HardwareAsset.InstalledSoftware
+
+		err = t.db.Model(asset.HardwareAsset).
+			Association("InstalledSoftware").
+			Clear()
+
+		err = t.db.Model(asset.HardwareAsset).
+			Association("InstalledSoftware").
+			Append(installed)
+	}
 
 	if err != nil {
 		return err

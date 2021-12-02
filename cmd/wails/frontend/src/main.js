@@ -1,9 +1,9 @@
 import {createApp} from "vue"
 import {createMemoryHistory, createRouter} from "vue-router"
 import {createStore} from "vuex"
-import {get, has, isObjectLike, unset} from "lodash"
+import {get, has, isObjectLike, unset, extend} from "lodash"
+
 import dayjs from "dayjs";
-import JQuery from 'jquery'
 
 import '@tabler/core/dist/css/tabler.css'
 import '@tabler/core/dist/js/tabler'
@@ -16,14 +16,14 @@ import ManufacturerList from "@/components/ManufacturerList";
 import ErrorModal from "@/components/ErrorModal";
 import AssetEdit from "@/components/AssetEdit";
 import Backup from "@/components/Backup";
-
-window.jQuery = window.$ = JQuery
+import VulnerabilityModal from "@/components/VulnerabilityModal";
 
 window._ = {
     has,
     get,
     isObjectLike,
     unset,
+    extend
 }
 
 const routes = [
@@ -135,6 +135,7 @@ const app = createApp(App)
 
 app.component("ErrorModal", ErrorModal)
 app.component("AssetEditModal", AssetEdit)
+app.component("VulnerabilityModal", VulnerabilityModal)
 
 app.use(router)
 app.use(store)

@@ -5,6 +5,7 @@ import (
 	"github.com/cmp307/assetman/pkg/backup"
 	"github.com/cmp307/assetman/pkg/storage/sqlite"
 	_ "github.com/cmp307/assetman/pkg/storage/sqlite"
+	"github.com/cmp307/assetman/pkg/vulnerability"
 	_ "github.com/cmp307/assetman/pkg/vulnerability"
 	"github.com/joho/godotenv"
 	"github.com/wailsapp/wails/v2"
@@ -12,6 +13,7 @@ import (
 	"github.com/wailsapp/wails/v2/pkg/options"
 	"github.com/wailsapp/wails/v2/pkg/options/windows"
 	"log"
+	"os"
 	"path/filepath"
 )
 
@@ -35,6 +37,7 @@ func main() {
 	mr := sqlite.NewManufacturerRepository(db)
 
 	bak := backup.NewService(app.ctx)
+	vs := vulnerability.NewService(os.Getenv("NVD_API_URL"), os.Getenv("NVD_API_KEY"))
 
 	// Create application with options
 	opts := &options.App{
@@ -59,6 +62,7 @@ func main() {
 			ar,
 			mr,
 			bak,
+			vs,
 		},
 		// Windows platform specific options
 		Windows: &windows.Options{
@@ -75,5 +79,5 @@ func main() {
 	}
 
 	// Initialise vulnerability service and configure Fx container
-	//vs := vulnerability.NewService(os.Getenv("NVD_API_URL"), os.Getenv("NVD_API_KEY"))
+	//
 }

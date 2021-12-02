@@ -38,7 +38,7 @@ type HardwareAsset struct {
 	IP                string
 	Location          string
 	WarrantyInfo      string
-	InstalledSoftware []SoftwareAsset `gorm:"many2many:hardware_software"`
+	InstalledSoftware []Asset `gorm:"many2many:hardware_software"`
 }
 
 type SoftwareAsset struct {
@@ -90,9 +90,8 @@ type QueryOptions struct {
 
 type User struct {
 	gorm.Model
-	Name        string
-	Password    []byte          `gorm:"size:60"`
-	Permissions []SoftwareAsset `gorm:"many2many:hardware_software"`
+	Name     string
+	Password []byte `gorm:"size:60"`
 }
 
 type AssetRepository interface {
@@ -101,6 +100,7 @@ type AssetRepository interface {
 	CountSoftware() int64
 	GetById(uint) Asset
 	Paginate(string, QueryOptions) ([]Asset, error)
+	GetAllSoftware() ([]Asset, error)
 	Save(Asset) error
 	Delete(Asset) error
 }

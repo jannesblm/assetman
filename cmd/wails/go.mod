@@ -44,3 +44,5 @@ require (
 	gorm.io/driver/sqlite v1.2.6 // indirect
 	gorm.io/gorm v1.22.3 // indirect
 )
+
+replace github.com/cmp307/assetman => /../../../assetman
