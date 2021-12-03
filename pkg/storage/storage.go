@@ -19,12 +19,14 @@ type Asset struct {
 	gorm.Model
 	Name           string `gorm:"index"`
 	Description    string
+	TypeName       string
 	ManufacturerID uint
 	Manufacturer   Manufacturer `gorm:"foreignKey:ID;references:ManufacturerID"`
 	PurchaseDate   time.Time
 	Note           string
 	AssetID        uint           `gorm:"index"`
 	AssetType      string         `gorm:"index"`
+	Report         Report         `gorm:"foreignKey:AssetID"`
 	HardwareAsset  *HardwareAsset `gorm:"foreignKey:ID;references:AssetID"`
 	SoftwareAsset  *SoftwareAsset `gorm:"foreignKey:ID;references:AssetID"`
 }
@@ -77,7 +79,8 @@ func (a *SoftwareAsset) GetID() uint {
 
 type Manufacturer struct {
 	gorm.Model
-	Name string `gorm:"uniqueIndex"`
+	Name   string  `gorm:"uniqueIndex"`
+	Assets []Asset `gorm:"foreignKey:ID;references:ID"`
 }
 
 type QueryOptions struct {
@@ -85,13 +88,26 @@ type QueryOptions struct {
 	QueryField string
 	Limit      int
 	Offset     int
-	Order      string `default:"id desc"`
+	Order      string
 }
 
 type User struct {
 	gorm.Model
 	Name     string
-	Password []byte `gorm:"size:60"`
+	Group    string
+	Password []byte `json:"-" gorm:"size:60"`
+}
+
+type Cve struct {
+	ReportID uint   `gorm:"primaryKey"`
+	CVE      string `gorm:"index;unique"`
+}
+
+type Report struct {
+	ID         uint `gorm:"primaryKey"`
+	AssetID    uint `gorm:"unique;foreignKey:ID;references:AssetID"`
+	ReportedAt time.Time
+	Cves       []Cve `gorm:"many2many:report_cve"`
 }
 
 type AssetRepository interface {
@@ -109,8 +125,15 @@ type ManufacturerRepository interface {
 	GetAll() ([]Manufacturer, error)
 	CountAll() int64
 	Paginate(QueryOptions) ([]Manufacturer, error)
+	Delete(Manufacturer) error
 }
 
 type UserRepository interface {
 	GetByName(name string) (User, error)
+	Save(User) error
+}
+
+type ReportRepository interface {
+	Paginate(QueryOptions) ([]Report, error)
+	Save(Report) error
 }

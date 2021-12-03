@@ -3,7 +3,8 @@
     <div class="col-lg-6">
       <div class="mb-3">
         <label class="form-label">License type</label>
-        <input v-model="asset.LicenseType" class="form-control" list="license-types" type="text">
+        <input v-model="asset.LicenseType" :readonly="!$store.getters.isAdmin" class="form-control" list="license-types"
+               type="text">
         <datalist id="license-types">
           <option value="Public Domain"/>
           <option value="Permissive"/>
@@ -15,7 +16,7 @@
     <div class="col-lg-6">
       <div class="mb-3">
         <label class="form-label">License key</label>
-        <input v-model="asset.LicenseType" class="form-control" type="text">
+        <input v-model="asset.LicenseType" :readonly="!$store.getters.isAdmin" class="form-control" type="text">
       </div>
     </div>
   </div>
@@ -23,7 +24,7 @@
     <div class="col-lg-6">
       <div class="mb-3">
         <label class="form-label">Version</label>
-        <input v-model="asset.Version" class="form-control" type="text">
+        <input v-model="asset.Version" :readonly="!$store.getters.isAdmin" class="form-control" type="text">
       </div>
     </div>
   </div>

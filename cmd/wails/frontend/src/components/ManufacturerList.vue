@@ -1,12 +1,22 @@
 <template>
   <div class="page-body">
     <div class="container-fluid">
+      <div class="row mb-4">
+        <h2 class="page-title">
+          Manufacturers
+        </h2>
+      </div>
       <div class="row">
         <div class="col-12">
           <DataTable :columns="columns"
                      :rows="manufacturers"
                      :total="$store.state.count.manufacturers"
                      @update="load">
+            <template v-slot:default="props">
+              <td data-label="Delete">
+                <a class="btn btn-danger btn-icon" @click="deleteManufacturer(props.row)"><i class="ti ti-trash"></i></a>
+              </td>
+            </template>
           </DataTable>
         </div>
       </div>
@@ -17,6 +27,7 @@
 <script>
 import {Manufacturer} from "@/models";
 import DataTable from "@/components/DataTable";
+import {ModelDto} from "@/models.dto";
 
 
 export default {
@@ -50,6 +61,10 @@ export default {
           noSearch: true,
           forEach: (d) => this.formatDate(d, 'DD/MM/YYYY')
         },
+        {
+          label: '',
+          class: 'w-1'
+        },
       ],
       manufacturers: [],
       editingAsset: null,
@@ -69,9 +84,26 @@ export default {
       ).map(m => new Manufacturer(m))
     },
 
+    async deleteManufacturer(manufacturer) {
+      this.$confirm("Deleting Asset",
+        "Are you sure that you want to delete the Manufacturer \"" + manufacturer.Name + "\"", async (status) => {
+          if (!status) {
+            return
+          }
+
+          try {
+            await window.go.sqlite.manufRepository.Delete(ModelDto.fromObject(manufacturer))
+          } catch (error) {
+            this.$showDialog("Error deleting asset", error)
+          }
+
+          await this.load()
+      })
+    },
+
     formatDate: function (val, format) {
       return this.$dayjs(val).format(format)
-    },
+    }
   },
 
   mounted() {

@@ -63,7 +63,8 @@ export default {
   methods: {
     async load() {
       try {
-        this.backups = await window.go.backup.service.GetBackupList()
+        this.backups = await window.go.fs.service.GetBackupList()
+        console.log(this.backups)
       } catch (error) {
         this.$showDialog("An error occurred", error)
       }
@@ -71,9 +72,10 @@ export default {
 
     backup: async function () {
       try {
-        const name = await window.go.backup.service.CreateBackup()
+        const name = await window.go.fs.service.CreateBackup()
 
-        this.$showDialog("Backup created", "Backup was successfully created at \"" + name + "\"", true)
+        this.$showDialog("Backup created", "Backup was successfully created at \"" + name + "\"",
+            true)
       } catch (error) {
         this.$showDialog("An error occurred", error)
       }
@@ -91,7 +93,8 @@ export default {
   },
 
   async mounted() {
-    this.backupPath = await window.go.backup.service.GetBackupDir()
+    this.backupPath = await window.go.fs.service.GetBackupDirectory()
+
     await this.load()
   }
 }

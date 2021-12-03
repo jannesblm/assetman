@@ -2,6 +2,31 @@
 
 export {};
 
+export class User {
+
+
+    static createFrom(source: any = {}) {
+        return new User(source);
+    }
+
+    constructor(source: any = {}) {
+        if ('string' === typeof source) source = JSON.parse(source);
+
+    }
+}
+
+export class Backup {
+
+
+    static createFrom(source: any = {}) {
+        return new Backup(source);
+    }
+
+    constructor(source: any = {}) {
+        if ('string' === typeof source) source = JSON.parse(source);
+
+    }
+}
 export class Asset {
 
 
@@ -16,18 +41,6 @@ export class Asset {
 }
 
 
-export class User {
-
-
-    static createFrom(source: any = {}) {
-        return new User(source);
-    }
-
-    constructor(source: any = {}) {
-        if ('string' === typeof source) source = JSON.parse(source);
-
-    }
-}
 export class QueryOptions {
 
 
@@ -58,11 +71,12 @@ export class Manufacturer {
 
 
 
-export class Backup {
+
+export class Report {
 
 
     static createFrom(source: any = {}) {
-        return new Backup(source);
+        return new Report(source);
     }
 
     constructor(source: any = {}) {
@@ -70,6 +84,7 @@ export class Backup {
 
     }
 }
+
 export class Cpe {
     deprecated: boolean;
     cpe23uri: string;

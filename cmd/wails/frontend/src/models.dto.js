@@ -13,13 +13,13 @@ function mapDeep(object, callback, predicate = null) {
     });
 }
 
-class AssetDto {
+class ModelDto {
 
     /**
      * @param asset<Asset>
      */
     static fromObject(asset) {
-        let dto = _.extend(new AssetDto(), asset)
+        let dto = _.extend(new ModelDto(), asset)
 
         _.unset(dto, 'SoftwareAsset.Asset')
         _.unset(dto, 'HardwareAsset.Asset')
@@ -31,4 +31,4 @@ class AssetDto {
     }
 }
 
-export {AssetDto}
+export {ModelDto}

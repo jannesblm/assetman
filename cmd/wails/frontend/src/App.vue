@@ -1,6 +1,6 @@
 <template>
   <div class="wrapper">
-    <Navigation v-if="$route.name !== 'login' && $store.state.user.isLoggedIn"/>
+    <Navigation v-if="$route.name !== 'login' && $store.getters.loggedIn"/>
     <div class="page-wrapper">
       <router-view/>
     </div>
@@ -38,10 +38,28 @@ export default {
         args: args,
       })
     }
-  }
+  },
 }
 </script>
 
 <style>
+.modal-full-width {
+  margin: 1rem
+}
 
+.form-selectgroup-item.disabled {
+  color: lightgray;
+}
+
+.btn-icon {
+  width: 20px;
+}
+
+.mr-3 {
+  margin-right: .5rem
+}
+
+.page-title {
+  height: 35px;
+}
 </style>

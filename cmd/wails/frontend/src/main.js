@@ -1,14 +1,14 @@
 import {createApp} from "vue"
 import {createMemoryHistory, createRouter} from "vue-router"
 import {createStore} from "vuex"
-import {get, has, isObjectLike, unset, extend} from "lodash"
+import {extend, get, has, isObjectLike, unset} from "lodash"
 
 import dayjs from "dayjs";
 
-import '@tabler/core/dist/css/tabler.css'
-import '@tabler/core/dist/js/tabler'
+import "@tabler/core/dist/css/tabler.css"
+import "@tabler/core/dist/js/tabler"
 
-import App from './App.vue'
+import App from "./App.vue"
 import HelloWorld from "@/components/HelloWorld";
 import AssetList from "@/components/AssetList";
 import Login from "@/components/Login";
@@ -44,8 +44,8 @@ const store = createStore({
         return {
             user: {
                 ID: 0,
-                name: '',
-                isLoggedIn: true,
+                Name: '',
+                Group: '',
             },
 
             count: {
@@ -67,6 +67,16 @@ const store = createStore({
                 },
             }
         }
+    },
+
+    getters: {
+        loggedIn: (state) => {
+            return state.user.ID > 0
+        },
+
+        isAdmin: (state) => {
+            return state.user.Group === "admin"
+        },
     },
 
     mutations: {
@@ -100,10 +110,18 @@ const store = createStore({
 
         setManufacturers(state, list) {
             state.manufacturers = list
+        },
+
+        setUser(state, user) {
+            state.user = user
         }
     },
 
     actions: {
+        setUser({commit}, user) {
+            commit("setUser", user)
+        },
+
         showModal({commit}, opts) {
             commit("showModal", opts)
         },
@@ -114,10 +132,11 @@ const store = createStore({
         },
 
         handleModalMessage({state}, message) {
+            console.log("handleModalMessage", message, _.has(state.modal.on, message.type), state.modal.on[message.type])
             _.has(state.modal.on, message.type) && state.modal.on[message.type](...message.args)
         },
 
-        async syncAssetCounts({ commit }) {
+        async syncAssetCounts({commit}) {
             commit("setAssetCounts", {
                 hardware: await window.go.sqlite.assetRepository.CountHardware(),
                 software: await window.go.sqlite.assetRepository.CountSoftware(),
@@ -125,7 +144,7 @@ const store = createStore({
             })
         },
 
-        async syncManufacturers({ commit }) {
+        async syncManufacturers({commit}) {
             commit("setManufacturers", await window.go.sqlite.manufRepository.GetAll())
         },
     }
@@ -163,6 +182,9 @@ app.config.globalProperties.$showDialog = function (title, description, success 
                     description: description,
                 })
             },
+            on: {
+                close: () => {}
+            }
         }).then()
     }, timeout)
 }
@@ -195,4 +217,12 @@ app.config.globalProperties.$confirm = function (title, description, callback) {
 }
 
 app.mount('#app')
-router.replace('/asset/list/software')
+
+window.go.auth.service.GetUser()
+    .then(user => {
+        store.dispatch("setUser", user)
+        router.replace({name: 'home'})
+    })
+    .catch(() => {
+        router.replace({name: 'login'})
+    })

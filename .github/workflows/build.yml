@@ -36,7 +36,7 @@ jobs:
           echo "::set-output name=go-bin::$(go env GOPATH)\bin"
           echo "::set-output name=wails-ver::$(go list -f {{.Version}} -m github.com/wailsapp/wails/v2)"
 
-      - name: Configure Git authentication
+      - name: Configure Git auth
         run: |
           git config --global url."https://${{ secrets.GIT_TOKEN }}:x-oauth-basic@github.com".insteadOf "https://github.com"
 
@@ -87,7 +87,9 @@ jobs:
         run: wails doctor
 
       - name: Transpile TS Models
-        run: struct2ts -o ./cmd/wails/frontend/src/models.ts storage.Asset storage.User storage.QueryOptions vulnerability.Cpe
+        shell: bash
+        run: struct2ts -o ./cmd/wails/frontend/src/models.ts storage.Asset \
+          storage.User storage.QueryOptions storage.Report vulnerability.Cpe
 
       - name: Compile TS
         working-directory: ./cmd/wails/frontend
