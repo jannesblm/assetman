@@ -1,4 +1,4 @@
-package backup
+package fs
 
 import (
 	"context"
@@ -18,6 +18,7 @@ type Backup struct {
 
 type Service interface {
 	CreateBackup() (string, error)
+	GetDatabasePath() string
 }
 
 type service struct {
@@ -32,7 +33,7 @@ func (s *service) GetDatabasePath() string {
 	return filepath.FromSlash(s.GetAppHomePath() + "/assets.db")
 }
 
-func (s *service) GetBackupDir() string {
+func (s *service) GetBackupDirectory() string {
 	return filepath.FromSlash(s.GetAppHomePath() + "/backups")
 }
 
@@ -41,10 +42,10 @@ func NewService(ctx context.Context) Service {
 		ctx: ctx,
 	}
 
-	err := os.MkdirAll(s.GetBackupDir(), os.ModePerm)
+	err := os.MkdirAll(s.GetBackupDirectory(), os.ModePerm)
 
 	if err != nil {
-		panic("cannot initialise backup service")
+		panic("cannot initialise fs service")
 	}
 
 	return s
@@ -58,7 +59,7 @@ func (s *service) CreateBackup() (string, error) {
 		return "", err
 	}
 
-	name := filepath.FromSlash(s.GetBackupDir() + "/backup-" + strconv.FormatInt(time.Now().Unix(), 10) + ".db")
+	name := filepath.FromSlash(s.GetBackupDirectory() + "/backup-" + strconv.FormatInt(time.Now().Unix(), 10) + ".db")
 	backup, err := os.Create(name)
 
 	defer backup.Close()
@@ -73,9 +74,9 @@ func (s *service) CreateBackup() (string, error) {
 }
 
 func (s *service) GetBackupList() ([]Backup, error) {
-	var backups []Backup
+	backups := make([]Backup, 0)
 
-	files, err := ioutil.ReadDir(s.GetBackupDir())
+	files, err := ioutil.ReadDir(s.GetBackupDirectory())
 
 	if err != nil {
 		return []Backup{}, err

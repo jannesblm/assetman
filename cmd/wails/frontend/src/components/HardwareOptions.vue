@@ -39,7 +39,7 @@
         <div class="mb-3">
           <label class="form-label">MAC</label>
           <Field v-slot="{field, errors}" v-model="asset.MAC" :rules="rules.macAddress" name="mac-address"
-                 type="text">
+                 type="text" :readonly="!$store.getters.isAdmin">
             <input :class="[{'is-invalid': errors.length > 0},'form-control']" v-bind="field">
           </Field>
           <ErrorMessage class="invalid-feedback" name="mac-address"/>
@@ -48,7 +48,7 @@
       <div class="col-lg-6">
         <div class="mb-3">
           <label class="form-label">IP</label>
-          <input v-model="asset.IP" class="form-control" type="text">
+          <input v-model="asset.IP" class="form-control" type="text" :readonly="!$store.getters.isAdmin">
         </div>
       </div>
     </div>

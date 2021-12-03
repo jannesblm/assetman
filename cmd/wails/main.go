@@ -2,11 +2,12 @@ package main
 
 import (
 	"embed"
-	"github.com/cmp307/assetman/pkg/backup"
+	"errors"
+	"github.com/cmp307/assetman/pkg/auth"
+	"github.com/cmp307/assetman/pkg/fs"
+	"github.com/cmp307/assetman/pkg/storage"
 	"github.com/cmp307/assetman/pkg/storage/sqlite"
-	_ "github.com/cmp307/assetman/pkg/storage/sqlite"
 	"github.com/cmp307/assetman/pkg/vulnerability"
-	_ "github.com/cmp307/assetman/pkg/vulnerability"
 	"github.com/joho/godotenv"
 	"github.com/wailsapp/wails/v2"
 	"github.com/wailsapp/wails/v2/pkg/logger"
@@ -14,7 +15,6 @@ import (
 	"github.com/wailsapp/wails/v2/pkg/options/windows"
 	"log"
 	"os"
-	"path/filepath"
 )
 
 //go:embed frontend/dist
@@ -29,23 +29,48 @@ func main() {
 
 	// Create an instance of the app structure
 	app := NewApp()
+	io := fs.NewService(app.ctx)
 
-	path := filepath.FromSlash(app.ctx.Value("HomeDir").(string) + "/assets.db")
-	db, err := sqlite.Connect(path)
+	createUsers := false
+
+	if _, err := os.Stat(io.GetDatabasePath()); errors.Is(err, os.ErrNotExist) {
+		createUsers = true
+	}
+
+	db, err := sqlite.Connect(io.GetDatabasePath())
+	err = db.MigrateAll()
+
+	if err != nil {
+		panic(err)
+	}
 
 	ar := sqlite.NewAssetRepository(db)
 	mr := sqlite.NewManufacturerRepository(db)
+	ur := sqlite.NewUserRepository(db)
+	rr := sqlite.NewReportRepository(db)
 
-	bak := backup.NewService(app.ctx)
+	if createUsers {
+		ur.Save(storage.User{
+			Name:     "admin",
+			Password: []byte("admin"),
+		})
+
+		ur.Save(storage.User{
+			Name:     "reporter",
+			Password: []byte("reporter"),
+		})
+	}
+
+	auth := auth.NewService(ur)
 	vs := vulnerability.NewService(os.Getenv("NVD_API_URL"), os.Getenv("NVD_API_KEY"))
 
 	// Create application with options
 	opts := &options.App{
 		Title:             "AssetMan",
 		Width:             1250,
-		Height:            488,
-		MinWidth:          720,
-		MinHeight:         570,
+		Height:            700,
+		MinWidth:          1250,
+		MinHeight:         700,
 		DisableResize:     false,
 		Fullscreen:        false,
 		Frameless:         false,
@@ -59,9 +84,11 @@ func main() {
 		OnShutdown:        app.shutdown,
 		Bind: []interface{}{
 			app,
+			auth,
+			io,
 			ar,
 			mr,
-			bak,
+			rr,
 			vs,
 		},
 		// Windows platform specific options
@@ -77,7 +104,4 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-
-	// Initialise vulnerability service and configure Fx container
-	//
 }

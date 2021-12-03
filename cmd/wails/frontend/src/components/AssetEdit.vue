@@ -5,16 +5,26 @@
       <button aria-label="Close" class="btn-close" type="button" @click="$emit('close', false)"></button>
     </div>
     <Form>
+
       <div class="modal-body">
-        <div class="mb-3">
-          <label class="form-label">Name</label>
-          <input v-model="asset.Name" class="form-control" placeholder="Asset name" type="text">
+        <div class="row mb-3">
+          <div class="col">
+            <label class="form-label">Name</label>
+            <input v-model="asset.Name" :readonly="!$store.getters.isAdmin" class="form-control" placeholder="Asset name"
+                   type="text">
+          </div>
+          <div class="col">
+            <label class="form-label">Type</label>
+            <input v-model="asset.TypeName" :readonly="!$store.getters.isAdmin" class="form-control" placeholder="Type"
+                   type="text">
+          </div>
         </div>
         <label class="form-label">Asset type</label>
         <div class="form-selectgroup-boxes row mb-3">
           <div class="col-lg-6  mb-3 mb-lg-0">
-            <label class="form-selectgroup-item">
-              <input v-model="asset.AssetType" :disabled="asset.ID > 0" checked class="form-selectgroup-input"
+            <label :class="[{disabled: asset.ID > 0 || !$store.getters.isAdmin}, 'form-selectgroup-item']">
+              <input v-model="asset.AssetType" :disabled="asset.ID > 0 || !$store.getters.isAdmin" checked
+                     class="form-selectgroup-input"
                      name="asset-type"
                      type="radio" value="hardware">
               <span class="form-selectgroup-label d-flex align-items-center p-3">
@@ -28,8 +38,9 @@
             </label>
           </div>
           <div class="col-lg-6">
-            <label class="form-selectgroup-item">
-              <input v-model="asset.AssetType" :disabled="asset.ID > 0" class="form-selectgroup-input"
+            <label :class="[{disabled: asset.ID > 0 || !$store.getters.isAdmin}, 'form-selectgroup-item']">
+              <input v-model="asset.AssetType" :disabled="asset.ID > 0 || !$store.getters.isAdmin"
+                     class="form-selectgroup-input"
                      name="asset-type"
                      type="radio" value="software">
               <span class="form-selectgroup-label d-flex align-items-center p-3">
@@ -45,7 +56,7 @@
         </div>
         <div class="mb-3">
           <label class="form-label">Description</label>
-          <input v-model="asset.Description" class="form-control" type="text">
+          <input v-model="asset.Description" :readonly="!$store.getters.isAdmin" class="form-control" type="text">
         </div>
         <div class="row">
           <div class="col-lg-6">
@@ -56,7 +67,7 @@
                     <i class="ti ti-calendar"></i>
                   </span>
                 <input id="asset-purchase-date" v-model="purchaseDate" class="form-control"
-                       placeholder="Select a date">
+                       placeholder="Select a date" :readonly="!$store.getters.isAdmin">
               </div>
             </div>
           </div>
@@ -67,6 +78,7 @@
                 <span v-if="manufacturerNotFound" class="badge bg-blue-lt">Creating New</span>
               </label>
               <input id="asset-manufacturer" v-model="manufacturer"
+                     :readonly="!$store.getters.isAdmin"
                      autocomplete="off"
                      class="form-control"
                      list="manufacturer-list"
@@ -91,7 +103,7 @@
         <div class="col-lg-12">
           <div>
             <label class="form-label">Notes</label>
-            <textarea class="form-control" rows="3" v-model="asset.Note"></textarea>
+            <textarea v-model="asset.Note" :readonly="!$store.getters.isAdmin" class="form-control" rows="3"></textarea>
           </div>
         </div>
       </div>
@@ -99,10 +111,11 @@
         <a class="btn btn-link link-secondary" @click="$emit('close', false)">
           Cancel
         </a>
-        <button type="button" class="btn btn-warning ms-auto" @click="save($event, true)">
+        <button :disabled="!$store.getters.isAdmin" class="btn btn-warning ms-auto" type="button"
+                @click="save($event, true)">
           Save & Search NVD
         </button>
-        <button type="button" class="btn btn-primary" @click="save($event)">
+        <button :disabled="!$store.getters.isAdmin" class="btn btn-primary" type="button" @click="save($event)">
           Save
         </button>
       </div>
@@ -113,7 +126,7 @@
 <script>
 import {Litepicker} from 'litepicker'
 import {Asset, HardwareAsset, SoftwareAsset} from "@/models";
-import {AssetDto} from "@/models.dto";
+import {ModelDto} from "@/models.dto";
 import {Form} from "vee-validate";
 
 import SoftwareOptions from "@/components/SoftwareOptions";
@@ -163,28 +176,17 @@ export default {
     async save(e, searchNvd = false) {
       e.preventDefault()
 
+      let error = null
+
       try {
-         await window.go.sqlite.assetRepository.Save(AssetDto.fromObject(this.asset))
+        await window.go.sqlite.assetRepository.Save(ModelDto.fromObject(this.asset))
+        await this.load()
       } catch (err) {
-        this.$emit("close", true)
-        this.$emit("message", "save", err, this.asset)
-
-        return
+        error = err
       }
 
-      if (searchNvd) {
-        this.$store.dispatch("showModal", {
-          classes: ['modal-sm', 'modal-dialog-centered'],
-
-          component: "VulnerabilityModal",
-
-          props: {
-            keyword: this.asset.Description
-          },
-        })
-      } else {
-        this.$emit("close", true)
-      }
+      this.$emit("close", true)
+      this.$emit("message", "save", error, this.asset, searchNvd)
     },
 
     onChange(asset) {
@@ -250,14 +252,16 @@ export default {
 
     this.$store.dispatch("syncManufacturers")
 
-    new Litepicker({
-      element: document.getElementById('asset-purchase-date'),
-      format: "DD/MM/YYYY",
-      buttonText: {
-        previousMonth: `<i class="ti ti-chevron-left">`,
-        nextMonth: `<i class="ti ti-chevron-right">`
-      },
-    })
+    if (this.$store.getters.isAdmin) {
+      new Litepicker({
+        element: document.getElementById('asset-purchase-date'),
+        format: "DD/MM/YYYY",
+        buttonText: {
+          previousMonth: `<i class="ti ti-chevron-left">`,
+          nextMonth: `<i class="ti ti-chevron-right">`
+        },
+      })
+    }
   },
 }
 </script>

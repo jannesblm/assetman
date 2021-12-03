@@ -48,7 +48,8 @@
             <input class="form-check-input" type="checkbox">
           </td>
           <td v-for="(column, index) in modelColumns" :key="index">
-            <div class="column-content">{{ forEach(column)(get(row, column.property)) }}</div>
+            <div v-if="!isTrusted(column)" class="column-content">{{ col(row, column) }}</div>
+            <div v-else class="column-content" v-html="col(row, column)"></div>
           </td>
           <slot :row="row"></slot>
         </tr>
@@ -159,15 +160,14 @@ export default {
   },
 
   methods: {
-    get: _.get,
-
     has: _.has,
 
-    toSnakeCase: function (str) {
+    toSQLName: function (str) {
       return str && str
-          .match(/[A-Z]{2,}(?=[A-Z][a-z]+[0-9]*|\b)|[A-Z]?[a-z]+[0-9]*|[A-Z]|[0-9]+/g)
-          .map(x => x.toLowerCase())
-          .join('_');
+          // GORM will alias the joined tables like StructName.snake_cased_property, this matches that
+          .match(/[A-za-z0-9]{2,}?\.|[A-za-z0-9]{2,}?(?=[A-Z]|$)/g)
+          .reduce((c, i) => c + (i.endsWith('.') ? i : `${i.toLowerCase()}_`), '')
+          .slice(0, -1)
     },
 
     isSortable: function (col) {
@@ -179,6 +179,14 @@ export default {
     isSearchable: function (col) {
       return _.has(col, 'property')
           && (!_.has(col, 'noSearch') || !col.noSearch)
+    },
+
+    isTrusted: function (col) {
+      return _.has(col, 'trusted') && col.trusted
+    },
+
+    col: function (row, col) {
+      return this.forEach(col)(_.get(row, col.property))
     },
 
     init: function () {
@@ -267,7 +275,12 @@ export default {
     sort: {
       get: function () {
         if (this.sortIndex >= 0) {
-          return this.toSnakeCase(this.columns[this.sortIndex].property) + " " + this.sortDir
+          return (_.has(this.columns[this.sortIndex], "prefix")
+                  ? `${this.columns[this.sortIndex].prefix}.` : '')
+                  + this.toSQLName(this.columns[this.sortIndex].property)
+                  + " " + this.sortDir
+
+
         }
 
         return ""
@@ -285,8 +298,6 @@ export default {
         }
 
         this.sortIndex = newVal
-
-        console.log(this.sort)
       }
     },
 
@@ -300,7 +311,9 @@ export default {
 
     queryField: function () {
       if (this.queryFieldIndex >= 0) {
-        return this.toSnakeCase(this.searchableColumns[this.queryFieldIndex].property)
+        return (_.has(this.columns[this.queryFieldIndex], "prefix")
+                ? `${this.columns[this.queryFieldIndex].prefix}.` : '')
+                + this.toSQLName(this.searchableColumns[this.queryFieldIndex].property)
       }
 
       return ""
@@ -316,6 +329,10 @@ export default {
 <style scoped>
 .font-weight-extrabold {
   font-weight: 900;
+}
+
+.table-responsive {
+  overflow-x: visible;
 }
 
 #query-field {

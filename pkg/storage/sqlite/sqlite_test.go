@@ -43,7 +43,7 @@ func (s *suite) SetupSuite() {
 	s.DB, err = gorm.Open(newSqliteDialector(db))
 	require.NoError(s.T(), err)
 
-	s.repository = &repository{s.DB}
+	s.repository = &repository{&DB{s.DB}}
 }
 
 func (s *suite) AfterTest(_, _ string) {

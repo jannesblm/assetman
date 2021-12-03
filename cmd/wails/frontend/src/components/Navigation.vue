@@ -44,7 +44,7 @@
               </router-link>
             </div>
           </li>
-          <li class="nav-item">
+          <li class="nav-item" v-if="$store.getters.isAdmin">
             <router-link :class="[{'active': $route.name === 'manufacturers'}, 'nav-link']"
                          to="/manufacturers">
               <span class="nav-link-icon d-md-none d-lg-inline-block">
@@ -55,7 +55,7 @@
               </span>
             </router-link>
           </li>
-          <li class="nav-item">
+          <li class="nav-item" v-if="$store.getters.isAdmin">
             <router-link :class="[{'active': $route.name === 'backup'}, 'nav-link']"
                          to="/backup">
               <span class="nav-link-icon d-md-none d-lg-inline-block">
@@ -66,7 +66,20 @@
               </span>
             </router-link>
           </li>
+          <li class="nav-item">
+            <a class="nav-link cursor-pointer" @click="logout">
+              <span class="nav-link-icon d-md-none d-lg-inline-block">
+                <i class="ti ti-logout"></i>
+              </span>
+              <span class="nav-link-title">
+                  Logout
+              </span>
+            </a>
+          </li>
           <li class="flex-grow-1"></li>
+          <li style="padding: 0.5rem 1.5rem">
+            Logged in as: {{ $store.state.user.Name }}
+          </li>
           <li style="padding: 0.5rem 1.5rem">
             <label class="form-check form-switch">
               <input class="form-check-input cursor-pointer" type="checkbox" v-model="darkMode">
@@ -97,6 +110,15 @@ export default {
         document.body.classList.remove('theme-dark');
       }
     },
+
+    logout: function () {
+      this.$confirm("Confirm", "Do you want to logout from the system?", (yes) => {
+        if (yes) {
+          window.go.auth.service.Logout()
+          this.$router.replace({name: "login"})
+        }
+      })
+    }
   },
 
   watch: {
