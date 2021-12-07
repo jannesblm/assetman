@@ -12,6 +12,7 @@ require (
 )
 
 require (
+	github.com/OneOfOne/struct2ts v1.0.6 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/jinzhu/inflection v1.0.0 // indirect
 	github.com/jinzhu/now v1.1.2 // indirect
