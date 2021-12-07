@@ -2,6 +2,7 @@ package sqlite
 
 import (
 	"errors"
+	"github.com/cmp307/assetman/pkg/auth"
 	"github.com/cmp307/assetman/pkg/storage"
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/driver/sqlite"
@@ -10,12 +11,17 @@ import (
 	"reflect"
 )
 
+var ErrNotInitialized = errors.New("database not initialized")
+var ErrNoWritePermission = errors.New("no write permissions")
+
 type Repository interface {
 	Connect() (*gorm.DB, error)
 }
 
 type DB struct {
 	*gorm.DB
+	auth        auth.Service
+	Initialized bool
 }
 
 func (db *DB) MigrateAll() error {
@@ -30,8 +36,34 @@ func (db *DB) MigrateAll() error {
 	)
 }
 
-func Connect(path string) (*DB, error) {
-	g, err := gorm.Open(sqlite.Open(path), &gorm.Config{
+func (db *DB) checkInitialised(gorm *gorm.DB) {
+	if !db.Initialized {
+		gorm.AddError(ErrNotInitialized)
+	}
+}
+
+func (db *DB) checkWritePermissions(gorm *gorm.DB) {
+	if user, err := db.auth.GetUser(); err == nil &&
+		user.Group == "admin" {
+		return
+	}
+
+	gorm.AddError(ErrNoWritePermission)
+}
+
+func (db *DB) InitialiseCallbacks() {
+	db.Callback().Query().Before("*").Register("check_init", db.checkInitialised)
+	db.Callback().Create().Before("*").Register("check_init", db.checkInitialised)
+	db.Callback().Update().Before("*").Register("check_init", db.checkInitialised)
+	db.Callback().Delete().Before("*").Register("check_init", db.checkInitialised)
+
+	db.Callback().Create().Before("*").Register("check_auth", db.checkWritePermissions)
+	db.Callback().Update().Before("*").Register("check_auth", db.checkWritePermissions)
+	db.Callback().Delete().Before("*").Register("check_auth", db.checkWritePermissions)
+}
+
+func Connect(path string, auth auth.Service) (*DB, error) {
+	gorm, err := gorm.Open(sqlite.Open(path), &gorm.Config{
 		DisableForeignKeyConstraintWhenMigrating: true,
 	})
 
@@ -39,7 +71,10 @@ func Connect(path string) (*DB, error) {
 		return &DB{}, err
 	}
 
-	return &DB{g}, nil
+	db := &DB{gorm, auth, false}
+	db.InitialiseCallbacks()
+
+	return db, nil
 }
 
 type repository struct {
@@ -62,25 +97,25 @@ type reportRepository struct {
 	repository
 }
 
-func NewAssetRepository(db *DB) storage.AssetRepository {
+func NewAssetRepository(db *DB) *assetRepository {
 	return &assetRepository{
 		repository{db},
 	}
 }
 
-func NewManufacturerRepository(db *DB) storage.ManufacturerRepository {
+func NewManufacturerRepository(db *DB) *manufRepository {
 	return &manufRepository{
 		repository{db},
 	}
 }
 
-func NewUserRepository(db *DB) storage.UserRepository {
+func NewUserRepository(db *DB) *userRepository {
 	return &userRepository{
 		repository{db},
 	}
 }
 
-func NewReportRepository(db *DB) storage.ReportRepository {
+func NewReportRepository(db *DB) *reportRepository {
 	return &reportRepository{
 		repository{db},
 	}
@@ -185,8 +220,8 @@ func (t *assetRepository) CountAll() int64 {
 	return count
 }
 
-func (t *assetRepository) Save(asset storage.Asset) error {
-	return t.db.Transaction(func(tx *gorm.DB) error {
+func (t *assetRepository) Save(asset storage.Asset) (uint, error) {
+	err := t.db.Transaction(func(tx *gorm.DB) error {
 		err := t.db.
 			Model(reflect.New(asset.Type()).Interface()).
 			Clauses(
@@ -226,6 +261,8 @@ func (t *assetRepository) Save(asset storage.Asset) error {
 			Save(&asset).
 			Error
 	})
+
+	return asset.ID, err
 }
 
 func (t *assetRepository) Delete(asset storage.Asset) error {

@@ -6,6 +6,7 @@ require (
 	github.com/cmp307/assetman v0.0.0-20211126122919-72c233487cc2
 	github.com/joho/godotenv v1.4.0
 	github.com/wailsapp/wails/v2 v2.0.0-beta.21
+	gorm.io/gorm v1.22.3
 )
 
 require (
@@ -15,7 +16,7 @@ require (
 	github.com/go-ole/go-ole v1.2.5 // indirect
 	github.com/gofiber/fiber/v2 v2.17.0 // indirect
 	github.com/gofiber/websocket/v2 v2.0.8 // indirect
-	github.com/google/uuid v1.1.2 // indirect
+	github.com/google/uuid v1.3.0 // indirect
 	github.com/gotk3/gotk3 v0.6.1 // indirect
 	github.com/imdario/mergo v0.3.12 // indirect
 	github.com/jchv/go-winloader v0.0.0-20210711035445-715c2860da7e // indirect
@@ -43,7 +44,6 @@ require (
 	golang.org/x/net v0.0.0-20211112202133-69e39bad7dc2 // indirect
 	golang.org/x/sys v0.0.0-20211124211545-fe61309f8881 // indirect
 	gorm.io/driver/sqlite v1.2.6 // indirect
-	gorm.io/gorm v1.22.3 // indirect
 )
 
 replace github.com/cmp307/assetman => /../../../assetman

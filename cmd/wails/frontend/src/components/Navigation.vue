@@ -5,22 +5,12 @@
         <span class="navbar-toggler-icon"></span>
       </button>
       <h1 class="navbar-brand navbar-brand-autodark">
-        <router-link to="/">
+        <router-link to="/asset/list/hardware">
           <img class="logo" src="scottishglen.png" alt="logo"/>
         </router-link>
       </h1>
       <div id="navbar-menu" class="collapse navbar-collapse">
         <ul class="navbar-nav pt-lg-3">
-          <li class="nav-item">
-            <router-link :class="[{'active': $route.name === 'home'}, 'nav-link']" to="/">
-              <span class="nav-link-icon d-md-none d-lg-inline-block">
-                <i class="ti ti-layout-2"></i>
-              </span>
-              <span class="nav-link-title">
-                    Home
-              </span>
-            </router-link>
-          </li>
           <li class="nav-item dropdown">
             <a class="nav-link dropdown-toggle" data-bs-auto-close="false"
                data-bs-toggle="dropdown" href="#" role="button">

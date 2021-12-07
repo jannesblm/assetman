@@ -42,7 +42,7 @@ export default {
         const user = await window.go.auth.service.Authenticate(this.user, this.password)
         this.$store.dispatch("setUser", user)
 
-        await this.$router.replace({ name: "home" })
+        await this.$router.replace('/asset/list/hardware')
       } catch (error) {
         this.$showDialog("Login failed",
             "Please check username and password and try again (" + error + ")")
