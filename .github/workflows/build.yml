@@ -89,7 +89,7 @@ jobs:
       - name: Transpile TS Models
         shell: bash
         run: struct2ts -o ./cmd/wails/frontend/src/models.ts storage.Asset \
-          storage.User storage.QueryOptions storage.Report vulnerability.Cpe
+          storage.User storage.QueryOptions storage.Report vulnerability.Cpe vulnerability.CpeResult
 
       - name: Compile TS
         working-directory: ./cmd/wails/frontend
