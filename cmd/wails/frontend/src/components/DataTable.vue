@@ -28,7 +28,7 @@
         <thead>
         <tr>
           <th v-if="checkboxes"></th>
-          <th v-for="(column, index) in columns" :key="column" :class="column.class">
+          <th v-for="(column, index) in visibleColumns" :key="column" :class="column.class">
             <span
                 :class="[{'text-green font-weight-extrabold': sortIndex === index, 'cursor-pointer': isSortable(column)}, 'd-flex']"
                 @click="sort = index">
@@ -165,7 +165,7 @@ export default {
     toSQLName: function (str) {
       return str && str
           // GORM will alias the joined tables like StructName.snake_cased_property, this matches that
-          .match(/[A-za-z0-9]{2,}?\.|[A-za-z0-9]{2,}?(?=[A-Z]|$)/g)
+          .match(/[A-za-z0-9]{2,}?\.|[A-za-z0-9]{2,}?[A-Z]?(?=$|[A-Z])/g)
           .reduce((c, i) => c + (i.endsWith('.') ? i : `${i.toLowerCase()}_`), '')
           .slice(0, -1)
     },
@@ -179,6 +179,11 @@ export default {
     isSearchable: function (col) {
       return _.has(col, 'property')
           && (!_.has(col, 'noSearch') || !col.noSearch)
+    },
+
+    isVisible: function (col) {
+      return ! _.has(col, 'hidden')
+          || (_.has(col, 'hidden') && col.hidden === false)
     },
 
     isTrusted: function (col) {
@@ -257,11 +262,15 @@ export default {
 
   computed: {
     modelColumns: function () {
-      return this.columns.filter(c => _.has(c, 'property'))
+      return this.columns.filter(c => this.isVisible(c) && _.has(c, 'property'))
     },
 
     searchableColumns: function () {
       return this.columns.filter(this.isSearchable)
+    },
+
+    visibleColumns: function () {
+      return this.columns.filter(this.isVisible)
     },
 
     availablePages: function () {
@@ -311,8 +320,8 @@ export default {
 
     queryField: function () {
       if (this.queryFieldIndex >= 0) {
-        return (_.has(this.columns[this.queryFieldIndex], "prefix")
-                ? `${this.columns[this.queryFieldIndex].prefix}.` : '')
+        return (_.has(this.searchableColumns[this.queryFieldIndex], "prefix")
+                ? `${this.searchableColumns[this.queryFieldIndex].prefix}.` : '')
                 + this.toSQLName(this.searchableColumns[this.queryFieldIndex].property)
       }
 

@@ -141,7 +141,7 @@ const go = {
       /**
        * Save
        * @param {Asset} arg1 - Go Type: storage.Asset
-       * @returns {Promise<Error>}  - Go Type: error
+       * @returns {Promise<number|Error>}  - Go Type: uint
        */
       "Save": (arg1) => {
         return window.go.sqlite.assetRepository.Save(arg1);
@@ -211,26 +211,34 @@ const go = {
     "service": {
       /**
        * GetLastCpe
-       * @returns {Promise<Array.<Cpe>>}  - Go Type: []vulnerability.Cpe
+       * @param {string} arg1 - Go Type: string
+       * @returns {Promise<CpeResult|Error>}  - Go Type: vulnerability.CpeResult
        */
-      "GetLastCpe": () => {
-        return window.go.vulnerability.service.GetLastCpe();
+      "GetLastCpe": (arg1) => {
+        return window.go.vulnerability.service.GetLastCpe(arg1);
       },
       /**
        * SearchCpeByKeyword
        * @param {string} arg1 - Go Type: string
-       * @returns {Promise<void>} 
+       * @returns {Promise<Array.<Cpe>|Error>}  - Go Type: []vulnerability.Cpe
        */
       "SearchCpeByKeyword": (arg1) => {
         return window.go.vulnerability.service.SearchCpeByKeyword(arg1);
       },
       /**
-       * SearchCveByKeyword
+       * SearchCpeByKeywordAsync
        * @param {string} arg1 - Go Type: string
-       * @returns {Promise<Array.<Cve>|Error>}  - Go Type: []vulnerability.Cve
+       * @returns {Promise<string>}  - Go Type: string
        */
-      "SearchCveByKeyword": (arg1) => {
-        return window.go.vulnerability.service.SearchCveByKeyword(arg1);
+      "SearchCpeByKeywordAsync": (arg1) => {
+        return window.go.vulnerability.service.SearchCpeByKeywordAsync(arg1);
+      },
+      /**
+       * WatchResults
+       * @returns {Promise<any>}  - Go Type: chan struct {}
+       */
+      "WatchResults": () => {
+        return window.go.vulnerability.service.WatchResults();
       },
     },
   },

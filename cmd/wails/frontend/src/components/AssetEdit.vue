@@ -162,8 +162,8 @@ export default {
 
   methods: {
     async load() {
-      if (this.id > 0) {
-        this.asset = new Asset(await window.go.sqlite.assetRepository.GetById(this.id))
+      if (this.asset.ID > 0) {
+        this.asset = new Asset(await window.go.sqlite.assetRepository.GetById(this.asset.ID))
       } else {
         this.asset = new Asset({
           'AssetType': 'hardware',
@@ -179,7 +179,7 @@ export default {
       let error = null
 
       try {
-        await window.go.sqlite.assetRepository.Save(ModelDto.fromObject(this.asset))
+        this.asset.ID = await window.go.sqlite.assetRepository.Save(ModelDto.fromObject(this.asset))
         await this.load()
       } catch (err) {
         error = err
@@ -202,7 +202,8 @@ export default {
   },
 
   watch: {
-    id: function () {
+    id: function (newVal) {
+      this.asset.ID = newVal
       this.load()
     },
   },
@@ -248,6 +249,8 @@ export default {
   },
 
   mounted() {
+    this.asset.ID = this.id
+
     this.load()
 
     this.$store.dispatch("syncManufacturers")

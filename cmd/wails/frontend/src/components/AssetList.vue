@@ -125,6 +125,16 @@ export default {
             label: '',
             class: 'w-1'
           },
+          {
+            label: "IP",
+            property: "HardwareAsset.IP",
+            hidden: true
+          },
+          {
+            label: "MAC",
+            property: "HardwareAsset.MAC",
+            hidden: true
+          }
         ],
 
         software: [
@@ -257,7 +267,7 @@ export default {
       }
 
       if (error === null && searchNvd) {
-        this.searchNvd(asset.Description, asset.ID, this.load)
+        this.searchNvd(asset.Description, asset.ID)
       } else {
         this.load()
       }
@@ -267,7 +277,9 @@ export default {
       return this.$dayjs(val).format(format)
     },
 
-    searchNvd(keyword, id, callback) {
+    searchNvd(keyword, id) {
+      let that = this
+
       this.$store.dispatch("showModal", {
         classes: ['modal-sm', 'modal-dialog-centered'],
 
@@ -279,7 +291,9 @@ export default {
         },
 
         on: {
-          searchDone: typeof callback === 'function' ? callback() : this.load
+          searchDone() {
+            that.load()
+          }
         }
       })
     }
