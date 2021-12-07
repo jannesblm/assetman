@@ -31,6 +31,7 @@ type Asset struct {
 	SoftwareAsset  *SoftwareAsset `gorm:"foreignKey:ID;references:AssetID"`
 }
 
+// HardwareAsset holds fields specific to hardware assets
 type HardwareAsset struct {
 	ID                uint   `gorm:"primaryKey"`
 	Asset             Asset  `gorm:"polymorphic:Asset;polymorphicValue:hardware"`
@@ -43,6 +44,7 @@ type HardwareAsset struct {
 	InstalledSoftware []Asset `gorm:"many2many:hardware_software"`
 }
 
+// SoftwareAsset holds fields specific to software assets
 type SoftwareAsset struct {
 	ID          uint  `gorm:"primaryKey"`
 	Asset       Asset `gorm:"polymorphic:Asset;polymorphicValue:software"`
@@ -69,6 +71,7 @@ func (a Asset) Polymorphic() BasicAsset {
 	}
 }
 
+// GetID implementation to conform with BasicAsset
 func (a *HardwareAsset) GetID() uint {
 	return a.ID
 }
@@ -77,6 +80,7 @@ func (a *SoftwareAsset) GetID() uint {
 	return a.ID
 }
 
+// Manufacturer has been normalised to its own entity
 type Manufacturer struct {
 	gorm.Model
 	Name   string  `gorm:"uniqueIndex"`
@@ -117,7 +121,7 @@ type AssetRepository interface {
 	GetById(uint) Asset
 	Paginate(string, QueryOptions) ([]Asset, error)
 	GetAllSoftware() ([]Asset, error)
-	Save(Asset) error
+	Save(Asset) (uint, error)
 	Delete(Asset) error
 }
 

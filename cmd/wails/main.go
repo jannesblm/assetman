@@ -13,6 +13,8 @@ import (
 	"github.com/wailsapp/wails/v2/pkg/logger"
 	"github.com/wailsapp/wails/v2/pkg/options"
 	"github.com/wailsapp/wails/v2/pkg/options/windows"
+	"gorm.io/gorm"
+	"gorm.io/gorm/utils/tests"
 	"log"
 	"os"
 )
@@ -21,11 +23,7 @@ import (
 var assets embed.FS
 
 func main() {
-	err := godotenv.Load()
-
-	if err != nil {
-		panic(err)
-	}
+	godotenv.Load()
 
 	// Create an instance of the app structure
 	app := NewApp()
@@ -37,32 +35,54 @@ func main() {
 		createUsers = true
 	}
 
-	db, err := sqlite.Connect(io.GetDatabasePath())
-	err = db.MigrateAll()
-
-	if err != nil {
-		panic(err)
-	}
+	// Initialise dummy db while we initialise the proper connection
+	// in another thread
+	gd, _ := gorm.Open(tests.DummyDialector{}, nil)
+	db := &sqlite.DB{DB: gd}
 
 	ar := sqlite.NewAssetRepository(db)
 	mr := sqlite.NewManufacturerRepository(db)
 	ur := sqlite.NewUserRepository(db)
 	rr := sqlite.NewReportRepository(db)
 
-	if createUsers {
-		ur.Save(storage.User{
-			Name:     "admin",
-			Password: []byte("admin"),
-		})
-
-		ur.Save(storage.User{
-			Name:     "reporter",
-			Password: []byte("reporter"),
-		})
-	}
-
 	auth := auth.NewService(ur)
+
+	// Initialise pre-execution callbacks manually to prevent calls to an uninitialised db
+	db.InitialiseCallbacks()
+
+	go func(db2 *sqlite.DB) {
+		db, err := sqlite.Connect(io.GetDatabasePath(), auth)
+
+		if err != nil {
+			panic(err)
+		}
+
+		*db2 = *db
+		err = db2.MigrateAll()
+
+		if err != nil {
+			panic(err)
+		}
+
+		if createUsers {
+			ur.Save(storage.User{
+				Name:     "admin",
+				Group:    "admin",
+				Password: []byte("admin"),
+			})
+
+			ur.Save(storage.User{
+				Name:     "reporter",
+				Group:    "reporter",
+				Password: []byte("reporter"),
+			})
+		}
+
+		db.Initialized = true
+	}(db)
+
 	vs := vulnerability.NewService(os.Getenv("NVD_API_URL"), os.Getenv("NVD_API_KEY"))
+	vs.WatchResults()
 
 	// Create application with options
 	opts := &options.App{
@@ -99,7 +119,7 @@ func main() {
 		},
 	}
 
-	err = wails.Run(opts)
+	err := wails.Run(opts)
 
 	if err != nil {
 		log.Fatal(err)

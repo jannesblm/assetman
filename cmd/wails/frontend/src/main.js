@@ -1,7 +1,7 @@
 import {createApp} from "vue"
 import {createMemoryHistory, createRouter} from "vue-router"
 import {createStore} from "vuex"
-import {extend, get, has, isObjectLike, unset} from "lodash"
+import {extend, get, has, isObjectLike, isPlainObject, uniq, unset} from "lodash"
 
 import dayjs from "dayjs";
 
@@ -9,7 +9,6 @@ import "@tabler/core/dist/css/tabler.css"
 import "@tabler/core/dist/js/tabler"
 
 import App from "./App.vue"
-import HelloWorld from "@/components/HelloWorld";
 import AssetList from "@/components/AssetList";
 import Login from "@/components/Login";
 import ManufacturerList from "@/components/ManufacturerList";
@@ -22,12 +21,13 @@ window._ = {
     has,
     get,
     isObjectLike,
+    isPlainObject,
     unset,
-    extend
+    extend,
+    uniq
 }
 
 const routes = [
-    {path: "/", name: "home", component: HelloWorld},
     {path: "/login", name: "login", component: Login},
     {path: "/asset/list/:type", name: "assets", component: AssetList},
     {path: "/manufacturers", name: "manufacturers", component: ManufacturerList},
@@ -132,8 +132,9 @@ const store = createStore({
         },
 
         handleModalMessage({state}, message) {
-            console.log("handleModalMessage", message, _.has(state.modal.on, message.type), state.modal.on[message.type])
-            _.has(state.modal.on, message.type) && state.modal.on[message.type](...message.args)
+            _.has(state.modal.on, message.type)
+            && typeof (state.modal.on[message.type]) === "function"
+            && state.modal.on[message.type](...message.args)
         },
 
         async syncAssetCounts({commit}) {
@@ -183,7 +184,8 @@ app.config.globalProperties.$showDialog = function (title, description, success 
                 })
             },
             on: {
-                close: () => {}
+                close: () => {
+                }
             }
         }).then()
     }, timeout)
@@ -221,7 +223,7 @@ app.mount('#app')
 window.go.auth.service.GetUser()
     .then(user => {
         store.dispatch("setUser", user)
-        router.replace({name: 'home'})
+        router.replace('/asset/list/hardware')
     })
     .catch(() => {
         router.replace({name: 'login'})

@@ -4,7 +4,7 @@ go 1.17
 
 require (
 	github.com/DATA-DOG/go-sqlmock v1.5.0
-	github.com/kildevaeld/go-acl v0.0.0-20171228130000-7799b11f4759
+	github.com/google/uuid v1.3.0
 	github.com/stretchr/testify v1.7.0
 	golang.org/x/crypto v0.0.0-20211202192323-5770296d904e
 	gorm.io/driver/sqlite v1.2.6
@@ -12,7 +12,6 @@ require (
 )
 
 require (
-	github.com/OneOfOne/struct2ts v1.0.6 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/jinzhu/inflection v1.0.0 // indirect
 	github.com/jinzhu/now v1.1.2 // indirect
