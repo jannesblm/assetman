@@ -6,6 +6,8 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
+var ErrNotAuthenticated = errors.New("not authenticated")
+
 type Service interface {
 	Authenticate(user string, password string) (storage.User, error)
 	Logout()
@@ -17,7 +19,7 @@ type service struct {
 	u *storage.User
 }
 
-func NewService(r storage.UserRepository) Service {
+func NewService(r storage.UserRepository) *service {
 	return &service{
 		r,
 		nil,
@@ -42,7 +44,7 @@ func (s *service) Authenticate(user string, password string) (storage.User, erro
 
 func (s *service) GetUser() (storage.User, error) {
 	if s.u == nil {
-		return storage.User{}, errors.New("not authenticated")
+		return storage.User{}, ErrNotAuthenticated
 	}
 
 	return *s.u, nil

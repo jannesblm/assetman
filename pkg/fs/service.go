@@ -37,7 +37,7 @@ func (s *service) GetBackupDirectory() string {
 	return filepath.FromSlash(s.GetAppHomePath() + "/backups")
 }
 
-func NewService(ctx context.Context) Service {
+func NewService(ctx context.Context) *service {
 	s := &service{
 		ctx: ctx,
 	}
