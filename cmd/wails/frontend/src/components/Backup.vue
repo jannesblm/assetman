@@ -64,7 +64,6 @@ export default {
     async load() {
       try {
         this.backups = await window.go.fs.service.GetBackupList()
-        console.log(this.backups)
       } catch (error) {
         this.$showDialog("An error occurred", error)
       }
