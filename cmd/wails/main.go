@@ -2,7 +2,6 @@ package main
 
 import (
 	"embed"
-	"errors"
 	"github.com/cmp307/assetman/pkg/auth"
 	"github.com/cmp307/assetman/pkg/fs"
 	"github.com/cmp307/assetman/pkg/storage"
@@ -28,12 +27,6 @@ func main() {
 	// Create an instance of the app structure
 	app := NewApp()
 	io := fs.NewService(app.ctx)
-
-	createUsers := false
-
-	if _, err := os.Stat(io.GetDatabasePath()); errors.Is(err, os.ErrNotExist) {
-		createUsers = true
-	}
 
 	// Initialise dummy db while we initialise the proper connection
 	// in another thread
@@ -64,21 +57,26 @@ func main() {
 			panic(err)
 		}
 
-		if createUsers {
-			ur.Save(storage.User{
+		db.SetInitialized(true)
+
+		// Bypass permission checks in user creation tx
+		db.Bypass(func(gorm *gorm.DB) error {
+			ur := sqlite.NewUserRepository(&sqlite.DB{DB: gorm})
+
+			err := ur.Save(storage.User{
 				Name:     "admin",
 				Group:    "admin",
 				Password: []byte("admin"),
 			})
 
-			ur.Save(storage.User{
+			err = ur.Save(storage.User{
 				Name:     "reporter",
 				Group:    "reporter",
 				Password: []byte("reporter"),
 			})
-		}
 
-		db.Initialized = true
+			return err
+		})
 	}(db)
 
 	vs := vulnerability.NewService(os.Getenv("NVD_API_URL"), os.Getenv("NVD_API_KEY"))

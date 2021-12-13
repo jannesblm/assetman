@@ -5,6 +5,7 @@ import (
 	"github.com/cmp307/assetman/pkg/auth"
 	"github.com/cmp307/assetman/pkg/storage"
 	"golang.org/x/crypto/bcrypt"
+	"golang.org/x/net/context"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
@@ -21,7 +22,7 @@ type Repository interface {
 type DB struct {
 	*gorm.DB
 	auth        auth.Service
-	Initialized bool
+	initialized bool
 }
 
 func (db *DB) MigrateAll() error {
@@ -36,15 +37,26 @@ func (db *DB) MigrateAll() error {
 	)
 }
 
-func (db *DB) checkInitialised(gorm *gorm.DB) {
-	if !db.Initialized {
+func (db *DB) Bypass(tx func(tx *gorm.DB) error) error {
+	return db.WithContext(context.WithValue(context.TODO(), "BypassAuth", true)).Transaction(tx)
+}
+
+func (db *DB) SetInitialized(state bool) {
+	db.initialized = state
+}
+
+func (db *DB) checkInitialized(gorm *gorm.DB) {
+	if !db.initialized {
 		gorm.AddError(ErrNotInitialized)
 	}
 }
 
 func (db *DB) checkWritePermissions(gorm *gorm.DB) {
-	if user, err := db.auth.GetUser(); err == nil &&
-		user.Group == "admin" {
+	if bypass, ok := gorm.Statement.Context.Value("BypassAuth").(bool); ok && bypass {
+		return
+	}
+
+	if user, err := db.auth.GetUser(); err == nil && user.Group == "admin" {
 		return
 	}
 
@@ -52,10 +64,10 @@ func (db *DB) checkWritePermissions(gorm *gorm.DB) {
 }
 
 func (db *DB) InitialiseCallbacks() {
-	db.Callback().Query().Before("*").Register("check_init", db.checkInitialised)
-	db.Callback().Create().Before("*").Register("check_init", db.checkInitialised)
-	db.Callback().Update().Before("*").Register("check_init", db.checkInitialised)
-	db.Callback().Delete().Before("*").Register("check_init", db.checkInitialised)
+	db.Callback().Query().Before("*").Register("check_init", db.checkInitialized)
+	db.Callback().Create().Before("*").Register("check_init", db.checkInitialized)
+	db.Callback().Update().Before("*").Register("check_init", db.checkInitialized)
+	db.Callback().Delete().Before("*").Register("check_init", db.checkInitialized)
 
 	db.Callback().Create().Before("*").Register("check_auth", db.checkWritePermissions)
 	db.Callback().Update().Before("*").Register("check_auth", db.checkWritePermissions)
@@ -257,7 +269,7 @@ func (t *assetRepository) Save(asset storage.Asset) (uint, error) {
 		asset.ManufacturerID = asset.Manufacturer.ID
 
 		return t.db.
-			Session(&gorm.Session{FullSaveAssociations: false}).
+			Omit("Report", "HardwareAsset", "SoftwareAsset").
 			Save(&asset).
 			Error
 	})
