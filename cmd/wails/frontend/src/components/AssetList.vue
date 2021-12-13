@@ -9,7 +9,9 @@
         </div>
         <div class="col">
           <div class="col-12 d-flex justify-content-end">
-            <button :disabled="!$store.getters.isAdmin" class="btn btn-primary w-auto" @click="editAsset(0)">Add asset
+            <button :disabled="!$store.getters.isAdmin" class="btn btn-primary w-auto"
+                    @click="editAsset(0, $route.params.type)"><i
+                class="ti ti-plus mr-3"></i>Add asset
             </button>
           </div>
         </div>
@@ -80,12 +82,12 @@ export default {
             defaultSearch: true,
           },
           {
-            property: 'TypeName',
-            label: 'Type',
-          },
-          {
             property: 'HardwareAsset.ModelName',
             label: 'Model',
+          },
+          {
+            property: 'TypeName',
+            label: 'Type',
           },
           {
             property: 'Manufacturer.Name',
@@ -97,8 +99,8 @@ export default {
             forEach: (d) => d.length > 20 ? (d.substr(0, 20) + "...") : d
           },
           {
-            property: 'UpdatedAt',
-            label: 'Updated',
+            property: 'PurchasedAt',
+            label: 'Purchased',
             sortable: true,
             prefix: "assets",
             noSearch: true,
@@ -134,7 +136,7 @@ export default {
             label: "MAC",
             property: "HardwareAsset.MAC",
             hidden: true
-          }
+          },
         ],
 
         software: [
@@ -200,6 +202,21 @@ export default {
             label: '',
             class: 'w-1'
           },
+          {
+            label: "Version",
+            property: "SoftwareAsset.Version",
+            hidden: true
+          },
+          {
+            label: "License Type",
+            property: "SoftwareAsset.LicenseType",
+            hidden: true
+          },
+          {
+            label: "License Key",
+            property: "SoftwareAsset.LicenseKey",
+            hidden: true
+          },
         ],
       },
       assets: [],
@@ -226,7 +243,7 @@ export default {
       }
     },
 
-    editAsset(asset) {
+    editAsset(asset, type) {
       this.editingAsset = asset
 
       this.$store.dispatch("showModal", {
@@ -235,7 +252,8 @@ export default {
         component: "AssetEditModal",
 
         props: {
-          id: this.editingAssetId
+          id: this.editingAssetId,
+          selectType: type,
         },
 
         on: {

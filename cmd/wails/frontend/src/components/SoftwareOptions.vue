@@ -16,7 +16,7 @@
     <div class="col-lg-6">
       <div class="mb-3">
         <label class="form-label">License key</label>
-        <input v-model="asset.LicenseType" :readonly="!$store.getters.isAdmin" class="form-control" type="text">
+        <input v-model="asset.LicenseKey" :readonly="!$store.getters.isAdmin" class="form-control" type="text">
       </div>
     </div>
   </div>
