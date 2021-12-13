@@ -50,6 +50,7 @@ type SoftwareAsset struct {
 	Asset       Asset `gorm:"polymorphic:Asset;polymorphicValue:software"`
 	Version     string
 	LicenseType string
+	LicenseKey  string
 }
 
 func (a Asset) GetID() uint {

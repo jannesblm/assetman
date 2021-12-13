@@ -38,7 +38,7 @@
       <div class="col-lg-6">
         <div class="mb-3">
           <label class="form-label">MAC</label>
-          <Field v-slot="{field, errors}" v-model="asset.MAC" :rules="rules.macAddress" name="mac-address"
+          <Field v-slot="{field, errors}" v-model="asset.MAC" name="mac-address"
                  type="text" :readonly="!$store.getters.isAdmin">
             <input :class="[{'is-invalid': errors.length > 0},'form-control']" v-bind="field">
           </Field>
@@ -48,7 +48,11 @@
       <div class="col-lg-6">
         <div class="mb-3">
           <label class="form-label">IP</label>
-          <input v-model="asset.IP" class="form-control" type="text" :readonly="!$store.getters.isAdmin">
+          <Field v-slot="{field, errors}" v-model="asset.IP" name="ip"
+                 type="text" :readonly="!$store.getters.isAdmin">
+            <input :class="[{'is-invalid': errors.length > 0},'form-control']" v-bind="field">
+          </Field>
+          <ErrorMessage class="invalid-feedback" name="ip"/>
         </div>
       </div>
     </div>
@@ -75,8 +79,6 @@
 
 <script>
 import {HardwareAsset} from "@/models";
-
-import * as yup from 'yup';
 import {ErrorMessage, Field} from "vee-validate";
 
 export default {
@@ -102,13 +104,6 @@ export default {
         InstalledSoftware: new Array(),
       }),
 
-      rules: {
-        macAddress: yup.string()
-            .required()
-            .matches(/^([0-9A-Fa-f]{2}[:-]){5}([0-9A-Fa-f]{2})$/,
-                "Not a valid MAC address (AA:BB:CC:DD:EE:FF)"),
-      },
-
       software: [],
     }
   },
@@ -126,7 +121,6 @@ export default {
       handler: async function (newVal) {
         this.asset = newVal
       },
-
       deep: true,
     },
 

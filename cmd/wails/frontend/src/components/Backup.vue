@@ -1,20 +1,27 @@
 <template>
   <div class="page-body">
     <div class="container-fluid">
-      <div class="row">
-        <div class="col-12">
-          <a class="btn btn-success w-100 mb-3" href="#" @click="backup">
-            Create Backup
-          </a>
+      <div class="row mb-4">
+        <div class="col">
+          <h2 class="page-title">
+            Backups
+          </h2>
+        </div>
+        <div class="col">
+          <div class="col-12 d-flex justify-content-end">
+            <a class="btn btn-success w-auto" href="#" @click="backup">
+              <i class="ti ti-plus mr-3"></i>Create Backup
+            </a>
+          </div>
         </div>
       </div>
       <div class="row">
         <div class="col-12">
           <DataTable :columns="columns"
                      :rows="backups"
-                     :total="backups.length"
-                     :show-header="false"
                      :show-footer="false"
+                     :show-header="false"
+                     :total="backups.length"
                      @update="load">
           </DataTable>
         </div>
