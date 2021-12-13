@@ -87,9 +87,9 @@ func (s *suite) SetupSuite() {
 }
 
 func (s *suite) Test_QueryingOnUninitializedDbIsDisallowed() {
-	s.ar.repository.db.Initialized = false
+	s.ar.repository.db.initialized = false
 	_, err := s.ar.GetAllSoftware()
-	s.ar.repository.db.Initialized = true
+	s.ar.repository.db.initialized = true
 
 	require.ErrorIs(s.T(), err, ErrNotInitialized)
 }
