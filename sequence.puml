@@ -1,0 +1,54 @@
+@startuml
+'https://plantuml.com/sequence-diagram
+
+actor User
+participant "Vue Frontend" as Frontend
+participant "Go Backend" as Backend
+participant Repository as Repo
+database Storage as DB
+
+autonumber
+
+User -> Frontend ++ : CRUD operation
+Frontend -> Backend ++ : Encode and send
+Backend -> Repo ++ : Call bound method
+
+autonumber stop
+
+alt has permission
+    autonumber 4
+
+    Repo -> DB ++ : Request data
+
+    alt ok
+        autonumber 5
+        DB --> Repo : data
+    else error
+        autonumber 5
+        DB --> Repo -- : error
+    end
+
+    Repo -> Repo : Transform data
+    Repo --> Backend : Transformed response
+    Backend --> Frontend : Encoded response
+    Frontend -> Frontend : Evaluate
+
+    alt ok
+        autonumber 10
+        Frontend -> Frontend : Update Views
+    else error
+        autonumber 10
+        Frontend -> User : Display error
+    end
+else permission denied
+    autonumber 4
+
+    Repo -> Backend -- : Deny access
+    Backend --> Frontend -- : Encoded response
+    Frontend -> Frontend : Evaluate
+    Frontend -> User  -- : Display error
+end
+
+autonumber resume
+
+@enduml
