@@ -1,0 +1,37 @@
+@startuml
+'https://plantuml.com/sequence-diagram
+
+participant "Go Backend" as Backend
+participant "Vuln. Service" as VS
+participant Result
+participant "NVD Api" as NVD
+
+autonumber
+
+Backend -> VS : Call SearchCpeByKeywordAsync
+VS -> Result ** : new
+VS --> Backend : uuid
+
+loop while Result != ready
+    group thread
+        VS -> NVD : GET /cpes/1.0
+        activate VS #005500
+        NVD --> VS : CPE data
+        VS -> VS : Transform
+        VS -> Result : Mark ready
+        deactivate VS
+
+    end
+
+    Backend -> VS : GetLastCPE(uuid)
+
+    alt if Result == ready
+        VS -> Result !! : pop
+    end
+
+    VS --> Backend : Result
+end
+
+
+
+@enduml

@@ -1,0 +1,43 @@
+@startuml
+'https://plantuml.com/use-case-diagram
+
+package Storage {
+    (View Assets) as (R)
+    (Filter By Fields) as (Filter)
+    (Filter by Type) as (Type)
+    (Add Asset) as (C)
+    (Edit Asset) as (U)
+    (Remove Asset) as (D)
+    (Search Vulnerabilities) as (Vuln)
+    (Display Vuln. Information) as (VulnInfo)
+    (Display Error) as (Err)
+
+    (Vuln) <|-- (VulnInfo) #line.dashed : <<extends>>\n{if Vuln. found}
+    (Vuln) <|-- (Err) #line.dashed : <<extends>>\n{if error during request}
+
+    (C) <|-- (Err) #line.dashed : <<extends>>\n{if validation fails}
+    (U) <|-- (Err) #line.dashed : <<extends>>\n{if validation fails}
+    (R) <|-- (Filter) #line.dashed : <<extends>>
+    (R) <|-- (Type) #line.dashed : <<extends>>
+}
+
+package Backup {
+    (Create Backup) as (CBack)
+    (View Backup List) as (RBack)
+}
+
+:Admin: as Admin
+:Reporter: as Reporter
+
+Admin -> (C)
+Admin -> (R)
+Admin -> (U)
+Admin -> (D)
+Admin -> (Vuln)
+Admin -> (CBack)
+Admin -> (RBack)
+
+
+Reporter -up-> (R)
+Reporter -up-> (Vuln)
+@enduml

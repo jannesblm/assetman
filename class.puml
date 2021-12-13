@@ -1,0 +1,288 @@
+@startuml
+'https://plantuml.com/class-diagram
+
+namespace auth {
+    interface Service  {
+        + Authenticate(user string, password string) (storage.User, error)
+        + Logout() 
+        + GetUser() (storage.User, error)
+
+    }
+    class service << (S,Aquamarine) >> {
+        - r storage.UserRepository
+        - u *storage.User
+
+        + Authenticate(user string, password string) (storage.User, error)
+        + GetUser() (storage.User, error)
+        + Logout() 
+
+    }
+}
+
+"auth.Service" <|-- "auth.service"
+
+namespace fs {
+    class Backup << (S,Aquamarine) >> {
+        + Path string
+        + Modified time.Time
+        + Size int64
+
+    }
+    interface Service  {
+        + CreateBackup() (string, error)
+        + GetDatabasePath() string
+
+    }
+    class service << (S,Aquamarine) >> {
+        - ctx context.Context
+
+        + GetAppHomePath() string
+        + GetDatabasePath() string
+        + GetBackupDirectory() string
+        + CreateBackup() (string, error)
+        + GetBackupList() ([]Backup, error)
+
+    }
+}
+
+"fs.Service" <|-- "fs.service"
+
+namespace sqlite {
+    class DB << (S,Aquamarine) >> {
+        - auth auth.Service
+        - initialized bool
+
+        - checkInitialized(gorm *gorm.DB)
+        - checkWritePermissions(gorm *gorm.DB) 
+
+        + MigrateAll() error
+        + Bypass(tx <font color=blue>func</font>(*gorm.DB) error) error
+        + SetInitialized(state bool) 
+        + InitialiseCallbacks() 
+
+    }
+    class assetRepository << (S,Aquamarine) >> #lightblue;line:blue;text:black {
+        + GetById(id uint) storage.Asset
+        + GetAllSoftware() ([]storage.Asset, error)
+        + Paginate(typ string, options storage.QueryOptions) ([]storage.Asset, error)
+        + CountSoftware() int64
+        + CountHardware() int64
+        + CountAll() int64
+        + Save(asset storage.Asset) (uint, error)
+        + Delete(asset storage.Asset) error
+
+    }
+    class manufRepository << (S,Aquamarine) >> #lightgreen;line:green;text:black {
+        + GetById(id uint) storage.Manufacturer
+        + GetAll() ([]storage.Manufacturer, error)
+        + Paginate(options storage.QueryOptions) ([]storage.Manufacturer, error)
+        + CountAll() int64
+        + Delete(manufacturer storage.Manufacturer) error
+
+    }
+    class reportRepository << (S,Aquamarine) >> #pink;line:red;text:black {
+        + Paginate(options storage.QueryOptions) ([]storage.Report, error)
+        + Save(report storage.Report) error
+
+    }
+    class repository << (S,Aquamarine) >> {
+        - db *DB
+
+        - paginate(options storage.QueryOptions) *gorm.DB
+
+    }
+    class userRepository << (S,Aquamarine) >> #white;line:black;text:black {
+        + GetByName(name string) (storage.User, error)
+        + Save(user storage.User) error
+
+    }
+}
+"gorm.DB" *-- "sqlite.DB"
+"sqlite.repository" *--[#blue] "sqlite.assetRepository"
+"sqlite.repository" *--[#green] "sqlite.manufRepository"
+"sqlite.repository" *--[#red] "sqlite.reportRepository"
+"sqlite.repository" *--[#black] "sqlite.userRepository"
+
+"storage.AssetRepository" <|--[#blue] "sqlite.assetRepository"
+"storage.ManufacturerRepository" <|--[#green] "sqlite.manufRepository"
+"storage.ReportRepository" <|--[#red] "sqlite.reportRepository"
+"storage.UserRepository" <|--[#black] "sqlite.userRepository"
+
+namespace storage {
+    class Asset << (S,Aquamarine) >> {
+        + Name string
+        + Description string
+        + TypeName string
+        + ManufacturerID uint
+        + Manufacturer Manufacturer
+        + PurchaseDate time.Time
+        + Note string
+        + AssetID uint
+        + AssetType string
+        + Report Report
+        + HardwareAsset *HardwareAsset
+        + SoftwareAsset *SoftwareAsset
+
+        + GetID() uint
+        + Type() reflect.Type
+        + Polymorphic() BasicAsset
+
+    }
+    interface AssetRepository #lightblue;line:blue;text:black {
+        + CountAll() int64
+        + CountHardware() int64
+        + CountSoftware() int64
+        + GetById( uint) Asset
+        + Paginate( string,  QueryOptions) ([]Asset, error)
+        + GetAllSoftware() ([]Asset, error)
+        + Save( Asset) (uint, error)
+        + Delete( Asset) error
+
+    }
+    interface BasicAsset  {
+        + GetID() uint
+
+    }
+    class Cve << (S,Aquamarine) >> {
+        + ReportID uint
+        + CVE string
+
+    }
+    class HardwareAsset << (S,Aquamarine) >> {
+        + ID uint
+        + Asset Asset
+        + ModelName string
+        + InternalID string
+        + MAC string
+        + IP string
+        + Location string
+        + WarrantyInfo string
+        + InstalledSoftware []Asset
+
+        + GetID() uint
+
+    }
+    class Manufacturer << (S,Aquamarine) >> {
+        + Name string
+        + Assets []Asset
+
+    }
+    interface ManufacturerRepository #lightgreen;line:green;text:black  {
+        + GetAll() ([]Manufacturer, error)
+        + CountAll() int64
+        + Paginate( QueryOptions) ([]Manufacturer, error)
+        + Delete( Manufacturer) error
+
+    }
+    class QueryOptions << (S,Aquamarine) >> {
+        + Query string
+        + QueryField string
+        + Limit int
+        + Offset int
+        + Order string
+
+    }
+    class Report << (S,Aquamarine) >> {
+        + ID uint
+        + AssetID uint
+        + ReportedAt time.Time
+        + Cves []Cve
+
+    }
+    interface ReportRepository #pink;line:red;text:black  {
+        + Paginate( QueryOptions) ([]Report, error)
+        + Save( Report) error
+
+    }
+    class SoftwareAsset << (S,Aquamarine) >> {
+        + ID uint
+        + Asset Asset
+        + Version string
+        + LicenseType string
+        + LicenseKey string
+
+        + GetID() uint
+
+    }
+    class User << (S,Aquamarine) >> {
+        + Name string
+        + Group string
+        + Password []byte
+
+    }
+    interface UserRepository #white;line:black;text:black {
+        + GetByName(name string) (User, error)
+        + Save( User) error
+
+    }
+}
+"gorm.Model" *-- "storage.Asset"
+"gorm.Model" *-- "storage.Manufacturer"
+"gorm.Model" *-- "storage.User"
+
+"storage.BasicAsset" <|-- "storage.Asset"
+"storage.BasicAsset" <|-- "storage.HardwareAsset"
+"storage.BasicAsset" <|-- "storage.SoftwareAsset"
+
+namespace vulnerability {
+    class Cpe << (S,Aquamarine) >> {
+        + Deprecated bool
+        + Cpe23Uri string
+        + LastModified string
+        + Titles []cpeTitles
+        + Refs []cpeRefs
+        + Vulnerabilities Vulnerabilities
+
+    }
+    class CpeResult << (S,Aquamarine) >> {
+        + StartedAt time.Time
+        + Finished bool
+        + Error error
+        + Cpes []Cpe
+
+    }
+    interface Service  {
+        + SearchCpeByKeyword( string) ([]Cpe, error)
+        + SearchCpeByKeywordAsync( string) string
+        + GetLastCpe( string) (CpeResult, error)
+
+    }
+    class cpeRefs << (S,Aquamarine) >> {
+        + Title string
+        + Lang string
+
+    }
+    class cpeResponse << (S,Aquamarine) >> {
+        + Result <font color=blue>struct</font>{[]Cpe}
+
+    }
+    class cpeTitles << (S,Aquamarine) >> {
+        + Title string
+        + Lang string
+
+    }
+    class service << (S,Aquamarine) >> {
+        - client http.Client
+        - baseUrl string
+        - apiKey string
+        - cpes <font color=blue>map</font>[string]CpeResult
+        - cpesLock sync.Mutex
+
+        - buildUrl(path string, params <font color=blue>map</font>[string]string) string
+        - parseResponse(resp *http.Response, v <font color=blue>interface</font>{}) error
+        - setCpeResult(id string, result CpeResult) 
+
+        + WatchResults() <font color=blue>chan</font> <font color=blue>struct</font>{}
+        + SearchCpeByKeyword(keyword string) ([]Cpe, error)
+        + SearchCpeByKeywordAsync(keyword string) string
+        + GetLastCpe(id string) (CpeResult, error)
+
+    }
+    class vulnerability.Vulnerabilities << (T, #FF7700) >>  {
+    }
+}
+
+"vulnerability.Service" <|-- "vulnerability.service"
+
+"__builtin__.[]string" #.. "vulnerability.Vulnerabilities"
+@enduml
