@@ -12,13 +12,17 @@ import (
 	"reflect"
 )
 
-var ErrNotInitialized = errors.New("database not initialized")
-var ErrNoWritePermission = errors.New("no write permissions")
+// Access errors
+var (
+	ErrNotInitialized    = errors.New("database not initialized")
+	ErrNoWritePermission = errors.New("no write permissions")
+)
 
 type Repository interface {
 	Connect() (*gorm.DB, error)
 }
 
+// DB is decorating gorm.DB to add auth and initialisations checks.
 type DB struct {
 	*gorm.DB
 	auth        auth.Service
@@ -37,6 +41,8 @@ func (db *DB) MigrateAll() error {
 	)
 }
 
+// Bypass disables authentication checks for the session in tx.
+// This should be used with care and not exposed to frontend.
 func (db *DB) Bypass(tx func(tx *gorm.DB) error) error {
 	return db.WithContext(context.WithValue(context.TODO(), "BypassAuth", true)).Transaction(tx)
 }
@@ -51,6 +57,8 @@ func (db *DB) checkInitialized(gorm *gorm.DB) {
 	}
 }
 
+// checkWritePermissions calls auth.Service.GetUser and checks if the
+// currently authenticated User has the "admin" group (allowing write-permissions)
 func (db *DB) checkWritePermissions(gorm *gorm.DB) {
 	if bypass, ok := gorm.Statement.Context.Value("BypassAuth").(bool); ok && bypass {
 		return
@@ -63,6 +71,8 @@ func (db *DB) checkWritePermissions(gorm *gorm.DB) {
 	gorm.AddError(ErrNoWritePermission)
 }
 
+// InitialiseCallbacks registers initialisation checks before CRUD and
+// authorisation checks before CUD operations.
 func (db *DB) InitialiseCallbacks() {
 	db.Callback().Query().Before("*").Register("check_init", db.checkInitialized)
 	db.Callback().Create().Before("*").Register("check_init", db.checkInitialized)
@@ -133,6 +143,8 @@ func NewReportRepository(db *DB) *reportRepository {
 	}
 }
 
+// paginate is a generic pagination method that sets
+// Order, Limit and Offset from the storage.QueryOptions struct
 func (t repository) paginate(options storage.QueryOptions) *gorm.DB {
 	tx := t.db.Preload(clause.Associations)
 
@@ -149,6 +161,16 @@ func (t repository) paginate(options storage.QueryOptions) *gorm.DB {
 	}
 
 	return tx
+}
+
+func (t *repository) checkWhitelist(s []string, e string) bool {
+	for _, a := range s {
+		if a == e {
+			return true
+		}
+	}
+
+	return false
 }
 
 // AssetRepository
@@ -176,6 +198,7 @@ func (t *assetRepository) GetAllSoftware() ([]storage.Asset, error) {
 	return all, err
 }
 
+// Paginate paginates assets by type storage.TypeHardware or storage.TypeSoftware
 func (t *assetRepository) Paginate(typ string, options storage.QueryOptions) ([]storage.Asset, error) {
 	var assets []storage.Asset
 
@@ -192,7 +215,23 @@ func (t *assetRepository) Paginate(typ string, options storage.QueryOptions) ([]
 			options.QueryField = "name"
 		}
 
-		tx.Where(options.QueryField+" like ?", "%"+options.Query+"%")
+		fieldWhitelist := []string{
+			"assets.name",
+			"type_name",
+			"description",
+			"purchase_date",
+			"Manufacturer.name",
+			"HardwareAsset.ip",
+			"HardwareAsset.mac",
+			"HardwareAsset.model_name",
+			"SoftwareAsset.version",
+			"SoftwareAsset.license_type",
+			"SoftwareAsset.license_key",
+		}
+
+		if t.checkWhitelist(fieldWhitelist, options.QueryField) {
+			tx.Where(options.QueryField+" like ?", "%"+options.Query+"%")
+		}
 	}
 
 	err := tx.Joins("Manufacturer").
@@ -232,6 +271,9 @@ func (t *assetRepository) CountAll() int64 {
 	return count
 }
 
+// Save uses reflection to save the associated Asset type.
+// A new or existing manufacturer will be linked.
+// The InstalledSoftware association will be replaced.
 func (t *assetRepository) Save(asset storage.Asset) (uint, error) {
 	err := t.db.Transaction(func(tx *gorm.DB) error {
 		err := t.db.
@@ -321,7 +363,13 @@ func (t *manufRepository) Paginate(options storage.QueryOptions) ([]storage.Manu
 	tx := t.paginate(options)
 
 	if len(options.Query) > 0 {
-		tx.Where(options.QueryField+" like ?", "%"+options.Query+"%")
+		fieldWhitelist := []string{
+			"name",
+		}
+
+		if t.checkWhitelist(fieldWhitelist, options.QueryField) {
+			tx.Where(options.QueryField+" like ?", "%"+options.Query+"%")
+		}
 	}
 
 	err := tx.Find(&manufacturers).Error
@@ -399,6 +447,8 @@ func (t *reportRepository) Paginate(options storage.QueryOptions) ([]storage.Rep
 	return reports, err
 }
 
+// Save will overwrite the report for its owning Asset
+// All CVE associations will be updated
 func (t *reportRepository) Save(report storage.Report) error {
 	cve := report.Cves
 

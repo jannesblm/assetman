@@ -75,7 +75,7 @@
                   <span class="input-icon-addon">
                     <i class="ti ti-calendar"></i>
                   </span>
-                <input id="asset-purchase-date" v-model="purchaseDate" :readonly="!$store.getters.isAdmin"
+                <input id="asset-purchase-date" :value="purchaseDate" :readonly="!$store.getters.isAdmin"
                        class="form-control" placeholder="Select a date">
               </div>
             </div>
@@ -292,7 +292,7 @@ export default {
       },
 
       set: function (newValue) {
-        this.asset.PurchaseDate = dayjs(newValue, "DD/MM/YYYY").toDate()
+        this.asset.PurchaseDate = newValue
       }
     }
   },
@@ -305,6 +305,11 @@ export default {
 
     if (this.$store.getters.isAdmin) {
       new Litepicker({
+        setup: (picker) => {
+          picker.on('selected', (date) => {
+            this.purchaseDate = date.dateInstance
+          });
+        },
         element: document.getElementById('asset-purchase-date'),
         dropdowns: {
           minYear: 1980,

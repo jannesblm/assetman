@@ -26,6 +26,8 @@ func NewService(r storage.UserRepository) *service {
 	}
 }
 
+// Authenticate will query its UserRepository by the given user
+// and compare the Bcrypt password hash.
 func (s *service) Authenticate(user string, password string) (storage.User, error) {
 	u, err := s.r.GetByName(user)
 
@@ -42,6 +44,7 @@ func (s *service) Authenticate(user string, password string) (storage.User, erro
 	return u, nil
 }
 
+// GetUser returns a populated user if authenticated, a zero struct if not.
 func (s *service) GetUser() (storage.User, error) {
 	if s.u == nil {
 		return storage.User{}, ErrNotAuthenticated

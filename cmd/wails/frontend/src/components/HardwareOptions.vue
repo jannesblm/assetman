@@ -39,8 +39,9 @@
         <div class="mb-3">
           <label class="form-label">MAC</label>
           <Field v-slot="{field, errors}" v-model="asset.MAC" name="mac-address"
-                 type="text" :readonly="!$store.getters.isAdmin">
-            <input :class="[{'is-invalid': errors.length > 0},'form-control']" v-bind="field">
+                 type="text">
+            <input :class="[{'is-invalid': errors.length > 0},'form-control']" :readonly="!$store.getters.isAdmin"
+                   v-bind="field">
           </Field>
           <ErrorMessage class="invalid-feedback" name="mac-address"/>
         </div>
@@ -48,9 +49,10 @@
       <div class="col-lg-6">
         <div class="mb-3">
           <label class="form-label">IP</label>
-          <Field v-slot="{field, errors}" v-model="asset.IP" name="ip"
-                 type="text" :readonly="!$store.getters.isAdmin">
-            <input :class="[{'is-invalid': errors.length > 0},'form-control']" v-bind="field">
+          <Field v-slot="{field, errors}" v-model="asset.IP"
+                 name="ip" type="text">
+            <input :class="[{'is-invalid': errors.length > 0},'form-control']" :readonly="!$store.getters.isAdmin"
+                   v-bind="field">
           </Field>
           <ErrorMessage class="invalid-feedback" name="ip"/>
         </div>
@@ -60,7 +62,7 @@
   <div class="row">
     <div class="mb-3">
       <div class="form-label">Installed Software</div>
-      <select v-model="installedSoftware" class="form-control" multiple>
+      <select v-model="installedSoftware" :readonly="!$store.getters.isAdmin" class="form-control" multiple>
         <option v-for="(software, index) in software" :key="index" :value="software.ID">{{ software.Name }}
           {{ software.SoftwareAsset.Version }}
         </option>
@@ -71,7 +73,8 @@
     <div class="col-lg-12">
       <div>
         <label class="form-label">Warranty info</label>
-        <textarea v-model="asset.WarrantyInfo" class="form-control" rows="3"></textarea>
+        <textarea v-model="asset.WarrantyInfo" :readonly="!$store.getters.isAdmin" class="form-control"
+                  rows="3"></textarea>
       </div>
     </div>
   </div>
