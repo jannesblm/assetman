@@ -99,7 +99,7 @@ export default {
             forEach: (d) => d.length > 20 ? (d.substr(0, 20) + "...") : d
           },
           {
-            property: 'PurchasedAt',
+            property: 'PurchaseDate',
             label: 'Purchased',
             sortable: true,
             prefix: "assets",
@@ -174,7 +174,7 @@ export default {
             forEach: (d) => d.length > 20 ? (d.substr(0, 20) + "...") : d
           },
           {
-            property: 'PurchasedAt',
+            property: 'PurchaseDate',
             label: 'Purchased',
             sortable: true,
             prefix: "assets",
@@ -288,6 +288,7 @@ export default {
         this.searchNvd(asset.Description, asset.ID)
       } else {
         this.load()
+        this.$store.dispatch("syncAssetCounts")
       }
     },
 
@@ -311,6 +312,7 @@ export default {
         on: {
           searchDone() {
             that.load()
+            that.$store.dispatch("syncAssetCounts")
           }
         }
       })

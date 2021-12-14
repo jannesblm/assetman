@@ -6,15 +6,19 @@ import (
 	"time"
 )
 
-const TypeHardware = "hardware"
-const TypeSoftware = "software"
+const (
+	TypeHardware = "hardware"
+	TypeSoftware = "software"
+)
 
+// BasicAsset is implemented by all Asset (Sub)Types
+// We access the Subtypes ID when storing the related type in AssetRepository.Save.
 type BasicAsset interface {
 	GetID() uint
 }
 
-// Asset holds general information about an asset and is either linked to a specific software or
-// hardware asset.
+// Asset holds general information about an asset and is either linked
+// to a specific software or hardware asset (hence the use of pointers for these Associations).
 type Asset struct {
 	gorm.Model
 	Name           string `gorm:"index"`
@@ -31,7 +35,7 @@ type Asset struct {
 	SoftwareAsset  *SoftwareAsset `gorm:"foreignKey:ID;references:AssetID"`
 }
 
-// HardwareAsset holds fields specific to hardware assets
+// HardwareAsset holds fields specific to hardware assets.
 type HardwareAsset struct {
 	ID                uint   `gorm:"primaryKey"`
 	Asset             Asset  `gorm:"polymorphic:Asset;polymorphicValue:hardware"`
@@ -44,7 +48,7 @@ type HardwareAsset struct {
 	InstalledSoftware []Asset `gorm:"many2many:hardware_software"`
 }
 
-// SoftwareAsset holds fields specific to software assets
+// SoftwareAsset holds fields specific to software assets.
 type SoftwareAsset struct {
 	ID          uint  `gorm:"primaryKey"`
 	Asset       Asset `gorm:"polymorphic:Asset;polymorphicValue:software"`
@@ -61,6 +65,8 @@ func (a Asset) Type() reflect.Type {
 	return reflect.TypeOf(a.Polymorphic())
 }
 
+// Polymorphic returns the HardwareAsset or SoftwareAsset
+// according to the AssetType column.
 func (a Asset) Polymorphic() BasicAsset {
 	switch a.AssetType {
 	case TypeHardware:
@@ -72,7 +78,6 @@ func (a Asset) Polymorphic() BasicAsset {
 	}
 }
 
-// GetID implementation to conform with BasicAsset
 func (a *HardwareAsset) GetID() uint {
 	return a.ID
 }
@@ -81,13 +86,14 @@ func (a *SoftwareAsset) GetID() uint {
 	return a.ID
 }
 
-// Manufacturer has been normalised to its own entity
+// Manufacturer has been normalised to its own entity.
 type Manufacturer struct {
 	gorm.Model
 	Name   string  `gorm:"uniqueIndex"`
 	Assets []Asset `gorm:"foreignKey:ID;references:ID"`
 }
 
+// QueryOptions holds pagination and filter data for various Repository methods.
 type QueryOptions struct {
 	Query      string
 	QueryField string
@@ -115,6 +121,7 @@ type Report struct {
 	Cves       []Cve `gorm:"many2many:report_cve"`
 }
 
+// AssetRepository defines all Asset related CRUD operations.
 type AssetRepository interface {
 	CountAll() int64
 	CountHardware() int64
@@ -126,6 +133,7 @@ type AssetRepository interface {
 	Delete(Asset) error
 }
 
+// ManufacturerRepository defines all Manufacturer related CRUD operations.
 type ManufacturerRepository interface {
 	GetAll() ([]Manufacturer, error)
 	CountAll() int64
@@ -133,11 +141,13 @@ type ManufacturerRepository interface {
 	Delete(Manufacturer) error
 }
 
+// UserRepository defines all User related CRUD operations.
 type UserRepository interface {
 	GetByName(name string) (User, error)
 	Save(User) error
 }
 
+// ReportRepository defines all Report related CRUD operations
 type ReportRepository interface {
 	Paginate(QueryOptions) ([]Report, error)
 	Save(Report) error

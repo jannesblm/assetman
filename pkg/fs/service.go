@@ -51,6 +51,7 @@ func NewService(ctx context.Context) *service {
 	return s
 }
 
+// CreateBackup creates a backup at default backup path and returns its location.
 func (s *service) CreateBackup() (string, error) {
 	db, err := os.OpenFile(s.GetDatabasePath(), os.O_RDONLY, os.ModePerm)
 	defer db.Close()
@@ -73,6 +74,7 @@ func (s *service) CreateBackup() (string, error) {
 	return name, err
 }
 
+// GetBackupList reads all files from the backup path.
 func (s *service) GetBackupList() ([]Backup, error) {
 	backups := make([]Backup, 0)
 

@@ -82,7 +82,6 @@ func main() {
 	vs := vulnerability.NewService(os.Getenv("NVD_API_URL"), os.Getenv("NVD_API_KEY"))
 	vs.WatchResults()
 
-	// Create application with options
 	opts := &options.App{
 		Title:             "AssetMan",
 		Width:             1250,
